@@ -1,0 +1,62 @@
+plugins {
+    id 'java'
+    id 'application' // 필요에 따라 추가
+}
+
+group = 'org.nhnnext'
+version = '1.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'ch.qos.logback:logback-classic:1.4.11'
+
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+        output.classesDirs.from = file('target/test-classes') // Test output directory
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': 'web-application-server',
+                'Implementation-Version': version
+        )
+    }
+    archiveBaseName.set('web-application-server') // finalName
+}
+
+// Dependency copying task
+task copyDependencies(type: Copy) {
+    from configurations.runtimeClasspath
+    into "$buildDir/libs/dependencies"
+}
