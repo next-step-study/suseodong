@@ -5,6 +5,7 @@ import static util.HttpRequestUtils.*;
 import static util.IOUtils.*;
 
 import com.google.common.base.Strings;
+import db.DataBase;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -69,11 +70,20 @@ public class RequestHandler extends Thread {
                             Map<String, String> parsedQueryString = parseQueryString(queryParams);
                             signUp(parsedQueryString);
                         } else if (reqMethod.equals("POST")) {
-                            Map<String, String> parsedRequestBody = parseQueryString(reqBody.toString());
+                            Map<String, String> parsedRequestBody = parseQueryString(reqBody);
                             signUp(parsedRequestBody);
                         }
                         log.info("SignUp with " + reqMethod);
                         response302Header(dos, "/index.html");
+                        return;
+                    } else if (reqUrl.startsWith("/user/login")) {
+                        Map<String, String> parsedRequestBody = parseQueryString(reqBody);
+                        boolean isSuccess = signIn(parsedRequestBody);
+                        if (isSuccess) {
+                            response302HeaderWithCookie(dos, "/index.html", "logined=true");
+                            return;
+                        }
+                        response302Header(dos, "/user/login_failed.html");
                         return;
                     } else {
                         resBody = "Invalid RequestUrl".getBytes();
@@ -90,15 +100,23 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private User signUp(Map<String, String> parsedQueryString) {
-        String userId = parsedQueryString.get("userId");
-        String password = parsedQueryString.get("password");
-        String name = parsedQueryString.get("name");
-        String email = parsedQueryString.get("email");
+    private void signUp(Map<String, String> parsedUserInfo) {
+        String userId = parsedUserInfo.get("userId");
+        String password = parsedUserInfo.get("password");
+        String name = parsedUserInfo.get("name");
+        String email = parsedUserInfo.get("email");
 
         User user = new User(userId, password, name, email);
         log.info("user id: " + user.getUserId() + ", user password: " + user.getPassword() + ", user name: " + user.getName() + ", user email: " + user.getEmail());
-        return user;
+        DataBase.addUser(user);
+    }
+
+    private boolean signIn(Map<String, String> parsedUserInfo) {
+        String userId = parsedUserInfo.get("userId");
+        String password = parsedUserInfo.get("password");
+
+        User userInDb = DataBase.findUserById(userId);
+        return userInDb != null && userInDb.getPassword().equals(password);
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
@@ -116,6 +134,17 @@ public class RequestHandler extends Thread {
         try {
             dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
             dos.writeBytes("Location: " + redirectUrl + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302HeaderWithCookie(DataOutputStream dos, String redirectUrl, String cookie) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
+            dos.writeBytes("Location: " + redirectUrl + "\r\n");
+            dos.writeBytes("Set-Cookie: " + cookie + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
