@@ -36,55 +36,55 @@ public class RequestHandler extends Thread {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line = br.readLine();
-            String requestMethod = parseRequestMethod(line);
-            String requestUrl = parseRequestUrl(line);
-            String requestHeader = "";
-            String requestBody = "";
+            String reqMethod = parseRequestMethod(line);
+            String reqUrl = parseRequestUrl(line);
+            String reqHeader = "";
+            String reqBody = "";
 
             log.info("----HTTP Request start----");
             log.info(line);
             while (!Strings.isNullOrEmpty(line)) {
                 line = br.readLine();
                 log.info(line);
-                requestHeader += line + "\n";
+                reqHeader += line + "\n";
             }
 
-            Map<String, String> parsedHeader = parseRequestHeader(requestHeader);
+            Map<String, String> parsedHeader = parseRequestHeader(reqHeader);
             if (parsedHeader.containsKey("Content-Length")) {
-                requestBody = readData(br, Integer.parseInt(parsedHeader.get("Content-Length")));
+                reqBody = readData(br, Integer.parseInt(parsedHeader.get("Content-Length")));
             }
             log.info("----HTTP Request end----");
 
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body;
-            if (!requestUrl.isEmpty()) {
-                File file = new File("./webapp" + requestUrl);
+            byte[] resBody;
+            if (!reqUrl.isEmpty()) {
+                File file = new File("./webapp" + reqUrl);
                 if (file.exists()) {
-                    body = Files.readAllBytes(new File("./webapp" + requestUrl).toPath());
+                    resBody = Files.readAllBytes(new File("./webapp" + reqUrl).toPath());
                 } else {
-                    if (requestUrl.startsWith("/user/create")) {
-                        if (requestMethod.equals("GET")) {
-                            int startPosition = requestUrl.indexOf("?");
-                            String queryParams = requestUrl.substring(startPosition + 1);
+                    if (reqUrl.startsWith("/user/create")) {
+                        if (reqMethod.equals("GET")) {
+                            int startPosition = reqUrl.indexOf("?");
+                            String queryParams = reqUrl.substring(startPosition + 1);
                             Map<String, String> parsedQueryString = parseQueryString(queryParams);
                             signUp(parsedQueryString);
-                        } else if (requestMethod.equals("POST")) {
-                            Map<String, String> parsedRequestBody = parseQueryString(requestBody.toString());
+                        } else if (reqMethod.equals("POST")) {
+                            Map<String, String> parsedRequestBody = parseQueryString(reqBody.toString());
                             signUp(parsedRequestBody);
                         }
-                        log.info("SignUp with " + requestMethod);
+                        log.info("SignUp with " + reqMethod);
                         response302Header(dos, "/index.html");
                         return;
                     } else {
-                        body = "Invalid RequestUrl".getBytes();
+                        resBody = "Invalid RequestUrl".getBytes();
                     }
                 }
             } else {
-                body = "Empty RequestUrl".getBytes();
+                resBody = "Empty RequestUrl".getBytes();
             }
 
-            response200Header(dos, body.length);
-            responseBody(dos, body);
+            response200Header(dos, resBody.length);
+            responseBody(dos, resBody);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
