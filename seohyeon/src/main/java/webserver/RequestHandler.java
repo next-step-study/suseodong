@@ -73,7 +73,8 @@ public class RequestHandler extends Thread {
                             signUp(parsedRequestBody);
                         }
                         log.info("SignUp with " + requestMethod);
-                        body = "SignUp Success".getBytes();
+                        response302Header(dos, "/index.html");
+                        return;
                     } else {
                         body = "Invalid RequestUrl".getBytes();
                     }
@@ -105,6 +106,16 @@ public class RequestHandler extends Thread {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302Header(DataOutputStream dos, String redirectUrl) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
+            dos.writeBytes("Location: " + redirectUrl + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
