@@ -1,5 +1,9 @@
 package webserver;
 
+import static util.HttpRequestHeaderUtils.*;
+import static util.HttpRequestUtils.*;
+import static util.IOUtils.*;
+
 import com.google.common.base.Strings;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -15,8 +19,6 @@ import java.util.Map;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.HttpRequestUrlUtils;
-import util.HttpRequestUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -33,15 +35,23 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String line = br.readLine();
+            String requestMethod = parseRequestMethod(line);
+            String requestUrl = parseRequestUrl(line);
+            String requestHeader = "";
+            String requestBody = "";
 
             log.info("----HTTP Request start----");
-            String line = br.readLine();
-            String requestMethod = HttpRequestUrlUtils.parseRequestMethod(line);
-            String requestUrl = HttpRequestUrlUtils.parseRequestUrl(line);
-
+            log.info(line);
             while (!Strings.isNullOrEmpty(line)) {
-                log.info(line);
                 line = br.readLine();
+                log.info(line);
+                requestHeader += line + "\n";
+            }
+
+            Map<String, String> parsedHeader = parseRequestHeader(requestHeader);
+            if (parsedHeader.containsKey("Content-Length")) {
+                requestBody = readData(br, Integer.parseInt(parsedHeader.get("Content-Length")));
             }
             log.info("----HTTP Request end----");
 
@@ -51,19 +61,22 @@ public class RequestHandler extends Thread {
                 File file = new File("./webapp" + requestUrl);
                 if (file.exists()) {
                     body = Files.readAllBytes(new File("./webapp" + requestUrl).toPath());
-                } else if (requestUrl.contains("?")) {
-                    int startPosition = requestUrl.indexOf("?");
-                    String requestPath = requestUrl.substring(0, startPosition);
-                    String queryParams = requestUrl.substring(startPosition + 1);
-                    Map<String, String> parsedQueryString = HttpRequestUtils.parseQueryString(queryParams);
-
-                    if (requestMethod.equals("GET") && requestPath.equals("/user/create")) {
-                        User user = signUp(parsedQueryString);
-                        log.info("user id: " + user.getUserId() + ", user password: " + user.getPassword() + ", user name: " + user.getName() + ", user email: " + user.getEmail());
-                    }
-                    body = "SignUp Success".getBytes();
                 } else {
-                    body = "Invalid RequestUrl".getBytes();
+                    if (requestUrl.startsWith("/user/create")) {
+                        if (requestMethod.equals("GET")) {
+                            int startPosition = requestUrl.indexOf("?");
+                            String queryParams = requestUrl.substring(startPosition + 1);
+                            Map<String, String> parsedQueryString = parseQueryString(queryParams);
+                            signUp(parsedQueryString);
+                        } else if (requestMethod.equals("POST")) {
+                            Map<String, String> parsedRequestBody = parseQueryString(requestBody.toString());
+                            signUp(parsedRequestBody);
+                        }
+                        log.info("SignUp with " + requestMethod);
+                        body = "SignUp Success".getBytes();
+                    } else {
+                        body = "Invalid RequestUrl".getBytes();
+                    }
                 }
             } else {
                 body = "Empty RequestUrl".getBytes();
@@ -81,7 +94,10 @@ public class RequestHandler extends Thread {
         String password = parsedQueryString.get("password");
         String name = parsedQueryString.get("name");
         String email = parsedQueryString.get("email");
-        return new User(userId, password, name, email);
+
+        User user = new User(userId, password, name, email);
+        log.info("user id: " + user.getUserId() + ", user password: " + user.getPassword() + ", user name: " + user.getName() + ", user email: " + user.getEmail());
+        return user;
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
