@@ -16,7 +16,7 @@ public class HttpRequestUrlUtilsTest {
     }
 
     @Test
-    public void parseRequestMethod_null() {
+    public void parseRequestMethod_invalid() {
         String requestMethod = HttpRequestUrlUtils.parseRequestMethod(null);
         assertThat(requestMethod.isEmpty(), is(true));
 
@@ -25,9 +25,18 @@ public class HttpRequestUrlUtilsTest {
     }
 
     @Test
-    public void getRequestUrl() {
-        String requestUrl = HttpRequestUrlUtils.getRequestUrl(firstLine);
+    public void parseRequestUrl() {
+        String requestUrl = HttpRequestUrlUtils.parseRequestUrl(firstLine);
         assertThat(requestUrl, is("/index.html"));
+    }
+
+    @Test
+    public void parseRequestUrl_invalid() {
+        String requestUrl = HttpRequestUrlUtils.parseRequestUrl(null);
+        assertThat(requestUrl.isEmpty(), is(true));
+
+        requestUrl = HttpRequestUrlUtils.parseRequestUrl("");
+        assertThat(requestUrl.isEmpty(), is(true));
     }
 
 }

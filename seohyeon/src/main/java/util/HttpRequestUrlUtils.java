@@ -12,12 +12,12 @@ public class HttpRequestUrlUtils {
         return "";
     }
 
-    public static String getRequestUrl(String line) {
+    public static String parseRequestUrl(String line) {
         if (!Strings.isNullOrEmpty(line)) {
             String[] firstLine = line.split(" ");
-            if (firstLine[1].length() > 1) return firstLine[1];
+            if (!firstLine[1].isEmpty()) return firstLine[1];
         }
-        return null;
+        return "";
     }
 
 }

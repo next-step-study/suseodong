@@ -37,7 +37,7 @@ public class RequestHandler extends Thread {
             log.info("----HTTP Request start----");
             String line = br.readLine();
             String requestMethod = HttpRequestUrlUtils.parseRequestMethod(line);
-            String requestUrl = HttpRequestUrlUtils.getRequestUrl(line);
+            String requestUrl = HttpRequestUrlUtils.parseRequestUrl(line);
 
             while (!Strings.isNullOrEmpty(line)) {
                 log.info(line);
@@ -47,7 +47,7 @@ public class RequestHandler extends Thread {
 
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body;
-            if (requestUrl != null) {
+            if (!requestUrl.isEmpty()) {
                 File file = new File("./webapp" + requestUrl);
                 if (file.exists()) {
                     body = Files.readAllBytes(new File("./webapp" + requestUrl).toPath());
