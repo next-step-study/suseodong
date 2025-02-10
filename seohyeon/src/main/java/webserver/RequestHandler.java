@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.Map;
 import model.User;
 import org.slf4j.Logger;
@@ -34,6 +35,8 @@ public class RequestHandler extends Thread {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
                 connection.getPort());
 
+        boolean isLogined = false;
+
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line = br.readLine();
@@ -51,6 +54,10 @@ public class RequestHandler extends Thread {
             }
 
             Map<String, String> parsedHeader = parseRequestHeader(reqHeader);
+            if (parsedHeader.containsKey("Cookie")) {
+                Map<String, String> cookies = parseCookies(parsedHeader.get("Cookie"));
+                if (Boolean.parseBoolean(cookies.get("logined"))) isLogined = true;
+            }
             if (parsedHeader.containsKey("Content-Length")) {
                 reqBody = readData(br, Integer.parseInt(parsedHeader.get("Content-Length")));
             }
@@ -61,7 +68,17 @@ public class RequestHandler extends Thread {
             if (!reqUrl.equals("/")) {
                 File file = new File("./webapp" + reqUrl);
                 if (file.exists()) {
-                    resBody = Files.readAllBytes(new File("./webapp" + reqUrl).toPath());
+                    if (reqUrl.startsWith("/user/list")) {
+                        if (isLogined) {
+                            StringBuilder users = createUserList();
+                            resBody = users.toString().getBytes();
+                        } else {
+                            response302Header(dos, "/user/login.html");
+                            return;
+                        }
+                    } else {
+                        resBody = Files.readAllBytes(new File("./webapp" + reqUrl).toPath());
+                    }
                 } else {
                     if (reqUrl.startsWith("/user/create")) {
                         if (reqMethod.equals("GET")) {
@@ -107,7 +124,7 @@ public class RequestHandler extends Thread {
         String email = parsedUserInfo.get("email");
 
         User user = new User(userId, password, name, email);
-        log.info("user id: " + user.getUserId() + ", user password: " + user.getPassword() + ", user name: " + user.getName() + ", user email: " + user.getEmail());
+        log.info(user.toString());
         DataBase.addUser(user);
     }
 
@@ -117,6 +134,25 @@ public class RequestHandler extends Thread {
 
         User userInDb = DataBase.findUserById(userId);
         return userInDb != null && userInDb.getPassword().equals(password);
+    }
+
+    private StringBuilder createUserList() {
+        StringBuilder userList = new StringBuilder();
+        userList.append("<table class=\"table table-hover\">\n<thead>\n<tr>\n")
+                .append("<th>사용자 아이디</th> <th>이름</th> <th>이메일</th>\n</tr>\n</thead>\n<tbody>\n");
+
+        Collection<User> users = DataBase.findAll();
+        int i = 0;
+        for (User user : users) {
+            i++;
+            userList.append("<tr>\n" + "<th scope=\"row\">").append(i)
+                    .append("</th><td>").append(user.getUserId()).append("</td><td>").append(user.getName())
+                    .append("</td><td>").append(user.getEmail()).append("</td>\n</tr>\n");
+        }
+
+        userList.append("</tbody>\n"
+                + "</table>");
+        return userList;
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
