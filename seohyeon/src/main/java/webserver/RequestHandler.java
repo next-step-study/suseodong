@@ -1,8 +1,9 @@
 package webserver;
 
-import static util.HttpRequestHeaderUtils.*;
+import static util.HttpRequestUrlUtils.*;
 import static util.HttpRequestUtils.*;
 import static util.IOUtils.*;
+import static util.http.HttpMethod.*;
 
 import com.google.common.base.Strings;
 import db.DataBase;
@@ -19,10 +20,14 @@ import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.http.HttpMethod;
+import util.http.ReqBody;
+import util.http.ReqHeader;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -41,15 +46,13 @@ public class RequestHandler extends Thread {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line = br.readLine();
-            String reqMethod = parseRequestMethod(line);
+            HttpMethod reqMethod = HttpMethod.valueOf(parseRequestMethod(line));
             String reqUrl = parseRequestUrl(line);
 
             log.info("----HTTP Request start----");
-            String reqHeader = readReqHeader(br);
-            Map<String, String> parsedRequestHeader = parseRequestHeader(reqHeader);
-
-            String reqBody = readReqBody(parsedRequestHeader, br);
-            setSignInStatus(parsedRequestHeader);
+            ReqHeader reqHeader = readReqHeader(br);
+            ReqBody reqBody = readReqBody(reqHeader, br);
+            setSignInStatus(reqHeader);
             log.info("----HTTP Request end----");
 
             DataOutputStream dos = new DataOutputStream(out);
@@ -74,21 +77,19 @@ public class RequestHandler extends Thread {
                     }
                 } else {
                     if (reqUrl.startsWith("/user/create")) {
-                        if (reqMethod.equals("GET")) {
+                        if (reqMethod.equals(GET)) {
                             String queryParams = URLDecoder.decode(reqUrl.substring(reqUrl.indexOf("?") + 1), "UTF-8");
-                            Map<String, String> parsedQueryString = parseQueryString(queryParams);
-                            signUp(parsedQueryString);
-                        } else if (reqMethod.equals("POST")) {
-                            Map<String, String> parsedRequestBody = parseQueryString(URLDecoder.decode(reqBody, "UTF-8"));
-                            signUp(parsedRequestBody);
+                            ReqBody reqParams = new ReqBody(parseQueryString(queryParams));
+                            signUp(reqParams);
+                        } else if (reqMethod.equals(POST)) {
+                            signUp(reqBody);
                         }
 
                         log.info("SignUp with " + reqMethod);
                         response302Header(dos, "/index.html");
                         return;
                     } else if (reqUrl.startsWith("/user/login")) {
-                        Map<String, String> parsedRequestBody = parseQueryString(reqBody);
-                        boolean isSuccess = signIn(parsedRequestBody);
+                        boolean isSuccess = signIn(reqBody);
                         if (isSuccess) {
                             response302HeaderWithCookie(dos, "/index.html", "logined=true");
                             return;
@@ -108,47 +109,49 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private String readReqHeader(BufferedReader br) throws IOException {
+    private ReqHeader readReqHeader(BufferedReader br) throws IOException {
         String line = br.readLine();
-        String reqHeader = "";
+        String rawHeader = "";
 
         while (!Strings.isNullOrEmpty(line)) {
-            reqHeader += line + "\n";
+            rawHeader += line + "\n";
             line = br.readLine();
         }
-        log.info(reqHeader);
+        log.info(rawHeader);
 
-        return reqHeader;
+        return parseRequestHeader(rawHeader);
     }
 
-    private static String readReqBody(Map<String, String> parsedHeader, BufferedReader br) throws IOException {
-        if (parsedHeader.containsKey("Content-Length")) {
-            return readData(br, Integer.parseInt(parsedHeader.get("Content-Length")));
+    private static ReqBody readReqBody(ReqHeader parsedHeader, BufferedReader br) throws IOException {
+        if (parsedHeader.exists("Content-Length")) {
+            String reqBody = readData(br, Integer.parseInt(parsedHeader.getValue("Content-Length")));
+            reqBody = URLDecoder.decode(reqBody, "UTF-8");
+            return new ReqBody(parseQueryString(reqBody));
         }
-        return "";
+        return new ReqBody(new HashMap<>());
     }
 
-    private void setSignInStatus(Map<String, String> parsedHeader) {
-        if (parsedHeader.containsKey("Cookie")) {
-            Map<String, String> cookies = parseCookies(parsedHeader.get("Cookie"));
+    private void setSignInStatus(ReqHeader parsedHeader) {
+        if (parsedHeader.exists("Cookie")) {
+            Map<String, String> cookies = parseCookies(parsedHeader.getValue("Cookie"));
             if (Boolean.parseBoolean(cookies.get("logined"))) isLogined = true;
         }
     }
 
-    private void signUp(Map<String, String> parsedUserInfo) {
-        String userId = parsedUserInfo.get("userId");
-        String password = parsedUserInfo.get("password");
-        String name = parsedUserInfo.get("name");
-        String email = parsedUserInfo.get("email");
+    private void signUp(ReqBody parsedUserInfo) {
+        String userId = parsedUserInfo.getValue("userId");
+        String password = parsedUserInfo.getValue("password");
+        String name = parsedUserInfo.getValue("name");
+        String email = parsedUserInfo.getValue("email");
 
         User user = new User(userId, password, name, email);
         log.info(user.toString());
         DataBase.addUser(user);
     }
 
-    private boolean signIn(Map<String, String> parsedUserInfo) {
-        String userId = parsedUserInfo.get("userId");
-        String password = parsedUserInfo.get("password");
+    private boolean signIn(ReqBody parsedUserInfo) {
+        String userId = parsedUserInfo.getValue("userId");
+        String password = parsedUserInfo.getValue("password");
 
         User userInDb = DataBase.findUserById(userId);
         return userInDb != null && userInDb.getPassword().equals(password);
