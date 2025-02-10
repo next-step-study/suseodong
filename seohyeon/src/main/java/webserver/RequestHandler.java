@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Map;
@@ -83,11 +84,11 @@ public class RequestHandler extends Thread {
                     if (reqUrl.startsWith("/user/create")) {
                         if (reqMethod.equals("GET")) {
                             int startPosition = reqUrl.indexOf("?");
-                            String queryParams = reqUrl.substring(startPosition + 1);
+                            String queryParams = URLDecoder.decode(reqUrl.substring(startPosition + 1), "UTF-8");
                             Map<String, String> parsedQueryString = parseQueryString(queryParams);
                             signUp(parsedQueryString);
                         } else if (reqMethod.equals("POST")) {
-                            Map<String, String> parsedRequestBody = parseQueryString(reqBody);
+                            Map<String, String> parsedRequestBody = parseQueryString(URLDecoder.decode(reqBody, "UTF-8"));
                             signUp(parsedRequestBody);
                         }
                         log.info("SignUp with " + reqMethod);
