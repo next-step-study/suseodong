@@ -17,6 +17,7 @@ import java.net.Socket;
 
 import java.net.URLDecoder;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
 import model.User;
@@ -27,6 +28,7 @@ public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private Socket connection;
+    private static boolean isLogined = false;
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
@@ -36,43 +38,30 @@ public class RequestHandler extends Thread {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
                 connection.getPort());
 
-        boolean isLogined = false;
-
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line = br.readLine();
             String reqMethod = parseRequestMethod(line);
             String reqUrl = parseRequestUrl(line);
-            String reqHeader = "";
-            String reqBody = "";
 
             log.info("----HTTP Request start----");
-            log.info(line);
-            while (!Strings.isNullOrEmpty(line)) {
-                line = br.readLine();
-                log.info(line);
-                reqHeader += line + "\n";
-            }
+            String reqHeader = readReqHeader(br);
+            Map<String, String> parsedRequestHeader = parseRequestHeader(reqHeader);
 
-            Map<String, String> parsedHeader = parseRequestHeader(reqHeader);
-            if (parsedHeader.containsKey("Cookie")) {
-                Map<String, String> cookies = parseCookies(parsedHeader.get("Cookie"));
-                if (Boolean.parseBoolean(cookies.get("logined"))) isLogined = true;
-            }
-            if (parsedHeader.containsKey("Content-Length")) {
-                reqBody = readData(br, Integer.parseInt(parsedHeader.get("Content-Length")));
-            }
+            String reqBody = readReqBody(parsedRequestHeader, br);
+            setSignInStatus(parsedRequestHeader);
             log.info("----HTTP Request end----");
 
             DataOutputStream dos = new DataOutputStream(out);
             byte[] resBody;
-            if (!reqUrl.equals("/")) {
-                File file = new File("./webapp" + reqUrl);
-                if (file.exists()) {
+            if (reqUrl.equals("/")) {
+                resBody = "Hello World".getBytes();
+            } else {
+                if (Files.isRegularFile(Paths.get("./webapp" + reqUrl))) {
                     if (reqUrl.startsWith("/user/list")) {
                         if (isLogined) {
-                            StringBuilder users = createUserList();
-                            resBody = users.toString().getBytes();
+                            String userListRes = createUserList();
+                            resBody = userListRes.getBytes();
                         } else {
                             response302Header(dos, "/user/login.html");
                             return;
@@ -86,14 +75,14 @@ public class RequestHandler extends Thread {
                 } else {
                     if (reqUrl.startsWith("/user/create")) {
                         if (reqMethod.equals("GET")) {
-                            int startPosition = reqUrl.indexOf("?");
-                            String queryParams = URLDecoder.decode(reqUrl.substring(startPosition + 1), "UTF-8");
+                            String queryParams = URLDecoder.decode(reqUrl.substring(reqUrl.indexOf("?") + 1), "UTF-8");
                             Map<String, String> parsedQueryString = parseQueryString(queryParams);
                             signUp(parsedQueryString);
                         } else if (reqMethod.equals("POST")) {
                             Map<String, String> parsedRequestBody = parseQueryString(URLDecoder.decode(reqBody, "UTF-8"));
                             signUp(parsedRequestBody);
                         }
+
                         log.info("SignUp with " + reqMethod);
                         response302Header(dos, "/index.html");
                         return;
@@ -110,14 +99,39 @@ public class RequestHandler extends Thread {
                         resBody = "Invalid RequestUrl".getBytes();
                     }
                 }
-            } else {
-                resBody = "Hello World".getBytes();
             }
 
             response200Header(dos, resBody.length);
             responseBody(dos, resBody);
         } catch (IOException e) {
             log.error(e.getMessage());
+        }
+    }
+
+    private String readReqHeader(BufferedReader br) throws IOException {
+        String line = br.readLine();
+        String reqHeader = "";
+
+        while (!Strings.isNullOrEmpty(line)) {
+            reqHeader += line + "\n";
+            line = br.readLine();
+        }
+        log.info(reqHeader);
+
+        return reqHeader;
+    }
+
+    private static String readReqBody(Map<String, String> parsedHeader, BufferedReader br) throws IOException {
+        if (parsedHeader.containsKey("Content-Length")) {
+            return readData(br, Integer.parseInt(parsedHeader.get("Content-Length")));
+        }
+        return "";
+    }
+
+    private void setSignInStatus(Map<String, String> parsedHeader) {
+        if (parsedHeader.containsKey("Cookie")) {
+            Map<String, String> cookies = parseCookies(parsedHeader.get("Cookie"));
+            if (Boolean.parseBoolean(cookies.get("logined"))) isLogined = true;
         }
     }
 
@@ -140,7 +154,7 @@ public class RequestHandler extends Thread {
         return userInDb != null && userInDb.getPassword().equals(password);
     }
 
-    private StringBuilder createUserList() {
+    private String createUserList() {
         StringBuilder userList = new StringBuilder();
         userList.append("<table class=\"table table-hover\">\n<thead>\n<tr>\n")
                 .append("<th>사용자 아이디</th> <th>이름</th> <th>이메일</th>\n</tr>\n</thead>\n<tbody>\n");
@@ -156,7 +170,7 @@ public class RequestHandler extends Thread {
 
         userList.append("</tbody>\n"
                 + "</table>");
-        return userList;
+        return userList.toString();
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
