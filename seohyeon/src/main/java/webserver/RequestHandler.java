@@ -58,7 +58,7 @@ public class RequestHandler extends Thread {
 
             DataOutputStream dos = new DataOutputStream(out);
             byte[] resBody;
-            if (!reqUrl.isEmpty()) {
+            if (!reqUrl.equals("/")) {
                 File file = new File("./webapp" + reqUrl);
                 if (file.exists()) {
                     resBody = Files.readAllBytes(new File("./webapp" + reqUrl).toPath());
@@ -90,7 +90,7 @@ public class RequestHandler extends Thread {
                     }
                 }
             } else {
-                resBody = "Empty RequestUrl".getBytes();
+                resBody = "Hello World".getBytes();
             }
 
             response200Header(dos, resBody.length);
