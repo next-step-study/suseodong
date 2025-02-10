@@ -3,8 +3,9 @@ package util;
 import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.Map;
+import util.http.ReqHeader;
 
-public class HttpRequestHeaderUtils {
+public class HttpRequestUrlUtils {
 
     public static String parseRequestMethod(String line) {
         if (!Strings.isNullOrEmpty(line)) {
@@ -27,11 +28,11 @@ public class HttpRequestHeaderUtils {
      *            Request Header에서 첫 번째 줄 이후로 전달되는 field1: value\nfield2: value2 형식임
      * @return
      */
-    public static Map<String, String> parseRequestHeader(String header) {
+    public static ReqHeader parseRequestHeader(String header) {
         if (validateLine(header, "\n")) {
-            return new HashMap<>();
+            return new ReqHeader(new HashMap<>());
         }
-        return parseLines(header);
+        return new ReqHeader(parseLines(header));
     }
 
     private static Map<String, String> parseLines(String header) {
