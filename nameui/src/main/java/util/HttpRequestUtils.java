@@ -1,6 +1,12 @@
 package util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -24,6 +30,30 @@ public class HttpRequestUtils {
      */
     public static Map<String, String> parseCookies(String cookies) {
         return parseValues(cookies, ";");
+    }
+
+    public static String parseURL(String line) {
+        String[] tokens = line.split(" ");
+        String base = "webapp";
+        String url = tokens[1];
+        return base + url;
+    }
+
+    public static List<String> readHeaders(InputStream in) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
+        List<String> headers = new ArrayList<>();
+        String line = br.readLine();
+        while(!"".equals(line)) {
+            if(line == null) {
+                break;
+            }
+//            log.info("read value : {}", line);
+            headers.add(line);
+            line = br.readLine();
+        }
+
+        return headers;
     }
 
     private static Map<String, String> parseValues(String values, String separator) {
