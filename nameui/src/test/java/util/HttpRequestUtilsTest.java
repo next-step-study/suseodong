@@ -3,6 +3,8 @@ package util;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.io.*;
+import java.util.List;
 import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +73,37 @@ public class HttpRequestUtilsTest {
         String header = "Content-Length: 59";
         Pair pair = HttpRequestUtils.parseHeader(header);
         assertThat(pair, is(new Pair("Content-Length", "59")));
+    }
+
+    @Test
+    public void readHeaders() throws IOException {
+        String input = "GET /index.html HTTP/1.1\nHost: localhost:8080\nConnection: keep-alive\nAccept: */*";
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+        List<String> headers = HttpRequestUtils.readHeaders(in);
+
+        assertThat(headers.isEmpty(), is(Boolean.FALSE));
+        assertThat(headers.get(0), is("GET /index.html HTTP/1.1"));
+        assertThat(headers.get(1), is("Host: localhost:8080"));
+        assertThat(headers.get(2), is("Connection: keep-alive"));
+        assertThat(headers.get(3), is("Accept: */*"));
+    }
+
+    @Test
+    public void parseURL() {
+        String input = "GET /user/create?userId=javajigi&password=password&name=JaeSung&email=javajigi%40slipp.net HTTP/1.1";
+        String[] url = HttpRequestUtils.parseURL(input);
+
+        assertThat(url[0], is("/user/create"));
+        assertThat(url[1], is("userId=javajigi&password=password&name=JaeSung&email=javajigi%40slipp.net"));
+    }
+
+    @Test
+    public void parseURL_is_not_query_string() {
+        String input = "GET /index.html HTTP/1.1";
+        String[] url = HttpRequestUtils.parseURL(input);
+
+        assertThat(url.length, is(1));
+        assertThat(url[0], is("/index.html"));
     }
 
     @Test
