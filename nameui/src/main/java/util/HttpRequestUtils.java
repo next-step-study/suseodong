@@ -12,7 +12,9 @@ import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class HttpRequestUtils {
     /**
      * @param
@@ -32,11 +34,9 @@ public class HttpRequestUtils {
         return parseValues(cookies, ";");
     }
 
-    public static String parseURL(String line) {
+    public static String[] parseURL(String line) {
         String[] tokens = line.split(" ");
-        String base = "webapp";
-        String url = tokens[1];
-        return base + url;
+        return tokens[1].split("\\?");
     }
 
     public static List<String> readHeaders(InputStream in) throws IOException {
@@ -48,7 +48,6 @@ public class HttpRequestUtils {
             if(line == null) {
                 break;
             }
-//            log.info("read value : {}", line);
             headers.add(line);
             line = br.readLine();
         }

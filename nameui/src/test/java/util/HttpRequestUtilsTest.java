@@ -5,10 +5,12 @@ import static org.junit.Assert.*;
 
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import util.HttpRequestUtils.Pair;
 
+@Slf4j
 public class HttpRequestUtilsTest {
     @Test
     public void parseQueryString() {
@@ -69,5 +71,16 @@ public class HttpRequestUtilsTest {
         String header = "Content-Length: 59";
         Pair pair = HttpRequestUtils.parseHeader(header);
         assertThat(pair, is(new Pair("Content-Length", "59")));
+    }
+
+    @Test
+    public void test() {
+        String url = "/user/create?userId=javajigi&password=password&name=JaeSung&email=javajigi%40slipp.net";
+        int index = url.indexOf("?");
+        log.info("index = {}", index);
+        String requestPath = url.substring(0, index);
+        String params = url.substring(index+1);
+        log.info("requestPath : {}", requestPath);
+        log.info("params : {}", params);
     }
 }

@@ -5,8 +5,11 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import db.DataBase;
 import lombok.extern.slf4j.Slf4j;
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
@@ -30,13 +33,27 @@ public class RequestHandler extends Thread {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
             // 헤더 읽어오기
             List<String> headers = HttpRequestUtils.readHeaders(in);
+            log.info("headers : \n{}" , headers);
 
             // 헤더에서 첫 번째 라인 요청 URL 추출하기
-            String url = HttpRequestUtils.parseURL(headers.get(0));
-            log.info("요청 주소 : {}", url);
+            String[] url = {"/index.html"};
+            if(!headers.isEmpty()) {
+                url = HttpRequestUtils.parseURL(headers.get(0));
+            }
+            log.info("요청 주소 : {}", url[0]);
+
+            // 회원가입
+            if (url[0].equals("/user/create")) {
+                Map<String, String> userString = HttpRequestUtils.parseQueryString(url[1]);
+
+                if (!userString.isEmpty()) {
+                    User user = new User(userString.get("userId"), userString.get("password"), userString.get("name"), userString.get("email"));
+                    DataBase.addUser(user);
+                }
+            }
 
             // 요청 URL 에 해당하는 파일을 읽어서 전달
-            byte[] body = Files.readAllBytes(new File(url).toPath());
+            byte[] body = Files.readAllBytes(new File("webapp" + url[0]).toPath());
 
             DataOutputStream dos = new DataOutputStream(out);
 //            byte[] body = "Hello Nameui".getBytes();
