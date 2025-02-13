@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.GenerateHtmlUtils;
 import util.HttpRequestUtils;
+import util.HttpResponseUtils;
 
 @Slf4j
 public class RequestHandler extends Thread {
@@ -52,15 +53,15 @@ public class RequestHandler extends Thread {
                         byte[] body = Files.readAllBytes(new File("webapp" + "/index.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
-                        response302HeaderWithCookie(dos, body.length, "/index.html");
-                        responseBody(dos, body);
+                        HttpResponseUtils.response302HeaderWithCookie(dos, body.length, "/index.html");
+                        HttpResponseUtils.responseBody(dos, body);
                     }
                     else { // 로그인 실패
                         byte[] body = Files.readAllBytes(new File("webapp" + "/user/login_failed.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
-                        response401HeaderWithCookie(dos, body.length, "/user/login_failed.html");
-                        responseBody(dos, body);
+                        HttpResponseUtils.response401HeaderWithCookie(dos, body.length, "/user/login_failed.html");
+                        HttpResponseUtils.responseBody(dos, body);
                     }
                 }
                 else if (url.equals("/user/create")) {
@@ -73,8 +74,8 @@ public class RequestHandler extends Thread {
                         byte[] body = Files.readAllBytes(new File("webapp" + "/index.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
-                        response302Header(dos, body.length, "/index.html");
-                        responseBody(dos, body);
+                        HttpResponseUtils.response302Header(dos, body.length, "/index.html");
+                        HttpResponseUtils.responseBody(dos, body);
                     }
                 }
             }
@@ -92,32 +93,32 @@ public class RequestHandler extends Thread {
                         // 응답 생성
                         byte[] result = resultStr.getBytes(StandardCharsets.UTF_8);
                         DataOutputStream dos = new DataOutputStream(out);
-                        response200Header(dos, result.length);
-                        responseBody(dos, result);
+                        HttpResponseUtils.response200Header(dos, result.length);
+                        HttpResponseUtils.responseBody(dos, result);
 
                     }
                     else { // 로그아웃 상태
                         byte[] body = Files.readAllBytes(new File("webapp" + "/user/login.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
-                        response401HeaderWithCookie(dos, body.length, "/user/login.html");
-                        responseBody(dos, body);
+                        HttpResponseUtils.response401HeaderWithCookie(dos, body.length, "/user/login.html");
+                        HttpResponseUtils.responseBody(dos, body);
                     }
                 }
                 else if(url.endsWith(".css")) {
                     byte[] css = Files.readAllBytes(new File("webapp" + url).toPath());
 
                     DataOutputStream dos = new DataOutputStream(out);
-                    responseCss(dos, css.length);
-                    responseBody(dos, css);
+                    HttpResponseUtils.responseCss(dos, css.length);
+                    HttpResponseUtils.responseBody(dos, css);
                 }
                 else {
                     // 요청 URL 에 해당하는 파일을 읽어서 전달
                     byte[] body = Files.readAllBytes(new File("webapp" + url).toPath());
 
                     DataOutputStream dos = new DataOutputStream(out);
-                    response200Header(dos, body.length);
-                    responseBody(dos, body);
+                    HttpResponseUtils.response200Header(dos, body.length);
+                    HttpResponseUtils.responseBody(dos, body);
                 }
             }
 
@@ -126,74 +127,7 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
 
-    private void response302Header(DataOutputStream dos, int lengthOfBodyContent, String url) {
-        try {
-            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
-            dos.writeBytes("Location: http://localhost:8080" + url + "\r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void response302HeaderWithCookie(DataOutputStream dos, int lengthOfBodyContent, String url) {
-        try {
-            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
-            dos.writeBytes("Location: http://localhost:8080" + url + "\r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Set-Cookie: logined=true\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void response401HeaderWithCookie(DataOutputStream dos, int lengthOfBodyContent, String url) {
-        try {
-            dos.writeBytes("HTTP/1.1 401 UNAUTHORIZED \r\n");
-            dos.writeBytes("Location: http://localhost:8080" + url + "\r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Set-Cookie: logined=false\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void responseCss(DataOutputStream dos, int lengthOfCssContent) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Accept: text/css,*/*;q=0.1\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfCssContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void responseBody(DataOutputStream dos, byte[] body) {
-        try {
-            dos.write(body, 0, body.length);
-            dos.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
 
 
 }
