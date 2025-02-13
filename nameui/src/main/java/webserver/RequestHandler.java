@@ -2,8 +2,10 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -76,12 +78,38 @@ public class RequestHandler extends Thread {
                 }
             }
             else if("GET".equals(headers.get("method"))) {
-                // 요청 URL 에 해당하는 파일을 읽어서 전달
-                byte[] body = Files.readAllBytes(new File("webapp" + url).toPath());
+                if("/user/list".equals(url)) {
+                    Map<String, String> cookies = HttpRequestUtils.parseCookies(headers.get("Cookie"));
+                    boolean isLogined = Boolean.parseBoolean(cookies.get("logined"));
 
-                DataOutputStream dos = new DataOutputStream(out);
-                response200Header(dos, body.length);
-                responseBody(dos, body);
+                    if (isLogined) { // 로그인 상태
+                        String body = new String(Files.readAllBytes(new File("webapp" + "/user/list.html").toPath()));
+                        String userTableHtml = generateUserTableHtml(new ArrayList<>(DataBase.findAll()));
+
+                        String resultStr = body.replace("                    {USER_TABLE}", userTableHtml);
+
+                        // 응답 생성
+                        byte[] result = resultStr.getBytes(StandardCharsets.UTF_8);
+                        DataOutputStream dos = new DataOutputStream(out);
+                        response200Header(dos, result.length);
+                        responseBody(dos, result);
+
+                    }
+                    else { // 로그아웃 상태
+                        byte[] body = Files.readAllBytes(new File("webapp" + "/user/login.html").toPath());
+
+                        DataOutputStream dos = new DataOutputStream(out);
+                        response401HeaderWithCookie(dos, body.length, "/user/login.html");
+                        responseBody(dos, body);
+                    }
+                } else {
+                    // 요청 URL 에 해당하는 파일을 읽어서 전달
+                    byte[] body = Files.readAllBytes(new File("webapp" + url).toPath());
+
+                    DataOutputStream dos = new DataOutputStream(out);
+                    response200Header(dos, body.length);
+                    responseBody(dos, body);
+                }
             }
 
         } catch (IOException e) {
@@ -145,5 +173,17 @@ public class RequestHandler extends Thread {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private String generateUserTableHtml(List<User> users) {
+        StringBuilder sb = new StringBuilder();
+
+        for(int i = 0; i<users.size(); i++) {
+            sb.append("                    <tr>\n"
+                    + "                          <th scope=\"row\">" + (i+1) + "</th> <td>" + users.get(i).getName() + "</td> <td>" + users.get(i).getEmail()
+                    + "</td> <td><a href=\"#\" class=\"btn btn-success\" role=\"button\">수정</a></td>\n                    </tr>\n");
+        }
+
+        return sb.toString();
     }
 }
