@@ -33,16 +33,35 @@ public class RequestHandler extends Thread {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
             // 헤더 읽어오기
             Map<String, String> headers = HttpRequestUtils.readHeaders(in);
+            log.info("headers : \n{}", headers);
 
             // 헤더에서 첫 번째 라인 요청 URL 추출하기
             String url = headers.get("url");
 
             // POST, GET 구분
             if ("POST".equals(headers.get("method"))) {
-                if (url.equals("/user/create")) {
-                    log.info("post content : {}", headers.get("content"));
+                if ("/user/login".equals(url)) {
                     Map<String, String> userString = HttpRequestUtils.parseQueryString(headers.get("content"));
-                    log.info("map userString : {}", userString);
+
+                    User user = DataBase.findUserById(userString.get("userId"));
+
+                    if (user != null && user.getPassword().equals(userString.get("password"))) { // 로그인 성공
+                        byte[] body = Files.readAllBytes(new File("webapp" + "/index.html").toPath());
+
+                        DataOutputStream dos = new DataOutputStream(out);
+                        response302HeaderWithCookie(dos, body.length, "/index.html");
+                        responseBody(dos, body);
+                    }
+                    else { // 로그인 실패
+                        byte[] body = Files.readAllBytes(new File("webapp" + "/user/login_failed.html").toPath());
+
+                        DataOutputStream dos = new DataOutputStream(out);
+                        response401HeaderWithCookie(dos, body.length, "/user/login_failed.html");
+                        responseBody(dos, body);
+                    }
+                }
+                else if (url.equals("/user/create")) {
+                    Map<String, String> userString = HttpRequestUtils.parseQueryString(headers.get("content"));
 
                     if (!userString.isEmpty()) {
                         User user = new User(userString.get("userId"), userString.get("password"), userString.get("name"), userString.get("email"));
@@ -51,7 +70,7 @@ public class RequestHandler extends Thread {
                         byte[] body = Files.readAllBytes(new File("webapp" + "/index.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
-                        response302Header(dos, body.length);
+                        response302Header(dos, body.length, "/index.html");
                         responseBody(dos, body);
                     }
                 }
@@ -81,11 +100,37 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void response302Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void response302Header(DataOutputStream dos, int lengthOfBodyContent, String url) {
         try {
             dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
-            dos.writeBytes("Location: http://localhost:8080/index.html\r\n");
+            dos.writeBytes("Location: http://localhost:8080" + url + "\r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302HeaderWithCookie(DataOutputStream dos, int lengthOfBodyContent, String url) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
+            dos.writeBytes("Location: http://localhost:8080" + url + "\r\n");
+            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Set-Cookie: logined=true\r\n");
+            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response401HeaderWithCookie(DataOutputStream dos, int lengthOfBodyContent, String url) {
+        try {
+            dos.writeBytes("HTTP/1.1 401 UNAUTHORIZED \r\n");
+            dos.writeBytes("Location: http://localhost:8080" + url + "\r\n");
+            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Set-Cookie: logined=false\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
