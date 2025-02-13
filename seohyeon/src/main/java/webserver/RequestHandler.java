@@ -94,7 +94,7 @@ public class RequestHandler extends Thread {
                             response302HeaderWithCookie(dos, "/index.html", "logined=true");
                             return;
                         }
-                        response302Header(dos, "/user/login_failed.html");
+                        response302HeaderWithCookie(dos, "/user/login_failed.html", "logined=false");
                         return;
                     } else {
                         resBody = "Invalid RequestUrl".getBytes();
