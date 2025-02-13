@@ -17,8 +17,4 @@ public class ReqBody {
         }
         return "";
     }
-
-    public int getSize() {
-        return this.body.size();
-    }
 }
