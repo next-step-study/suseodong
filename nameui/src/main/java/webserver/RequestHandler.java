@@ -48,10 +48,10 @@ public class RequestHandler extends Thread {
                         User user = new User(userString.get("userId"), userString.get("password"), userString.get("name"), userString.get("email"));
                         DataBase.addUser(user);
 
-                        byte[] body = "회원가입 성공".getBytes();
+                        byte[] body = Files.readAllBytes(new File("webapp" + "/index.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
-                        response200Header(dos, body.length);
+                        response302Header(dos, body.length);
                         responseBody(dos, body);
                     }
                 }
@@ -73,6 +73,18 @@ public class RequestHandler extends Thread {
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302Header(DataOutputStream dos, int lengthOfBodyContent) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
+            dos.writeBytes("Location: http://localhost:8080/index.html\r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
