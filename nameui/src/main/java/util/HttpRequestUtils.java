@@ -4,10 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
@@ -39,17 +37,42 @@ public class HttpRequestUtils {
         return tokens[1].split("\\?");
     }
 
-    public static List<String> readHeaders(InputStream in) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+    public static Map<String, String> readHeaders(InputStream in) throws IOException {
 
-        List<String> headers = new ArrayList<>();
+        BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+        Map<String, String> headers = new HashMap<>();
         String line = br.readLine();
+        if(line == null) {
+            return new HashMap<>();
+        }
+
+        // method, url, query 처리
+        headers.put("method", line.split(" ")[0]);
+        headers.put("url", line.split(" ")[1].split("\\?")[0]);
+        headers.put("query", "");
+
+        if (line.split(" ")[1].split("\\?").length == 2) {
+            headers.put("query", line.split(" ")[1].split("\\?")[1]);
+        }
+
+        // 다음 줄 부터는 ': ' 형식이므로 while 문 돌리기
+        line = br.readLine();
+        boolean isPost = headers.get("method").equals("POST");
         while(!"".equals(line)) {
-            if(line == null) {
+            if (line == null) {
                 break;
             }
-            headers.add(line);
+
+            String key = parseHeader(line).getKey();
+            String value = parseHeader(line).getValue();
+
+            headers.put(key, value);
             line = br.readLine();
+        }
+
+        if (isPost) {
+            String content = IOUtils.readData(br, Integer.parseInt(headers.get("Content-Length")));
+            headers.put("content", content);
         }
 
         return headers;

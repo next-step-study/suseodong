@@ -76,16 +76,33 @@ public class HttpRequestUtilsTest {
     }
 
     @Test
-    public void readHeaders() throws IOException {
-        String input = "GET /index.html HTTP/1.1\nHost: localhost:8080\nConnection: keep-alive\nAccept: */*";
+    public void readHeaders_POST() throws IOException {
+        String input = "POST /index.html HTTP/1.1\nHost: localhost:8080\nConnection: keep-alive\nAccept: */*\nContent-Length: 73\n" +
+                        "\nuserId=javajigi&password=password&name=JaeSung&email=javajigi%40slipp.net";
         InputStream in = new ByteArrayInputStream(input.getBytes());
-        List<String> headers = HttpRequestUtils.readHeaders(in);
+        Map<String, String> headers = HttpRequestUtils.readHeaders(in);
 
         assertThat(headers.isEmpty(), is(Boolean.FALSE));
-        assertThat(headers.get(0), is("GET /index.html HTTP/1.1"));
-        assertThat(headers.get(1), is("Host: localhost:8080"));
-        assertThat(headers.get(2), is("Connection: keep-alive"));
-        assertThat(headers.get(3), is("Accept: */*"));
+        assertThat(headers.get("method"), is("POST"));
+        assertThat(headers.get("url"), is("/index.html"));
+        assertThat(headers.get("Host"), is("localhost:8080"));
+        assertThat(headers.get("Connection"), is("keep-alive"));
+        assertThat(headers.get("Accept"), is("*/*"));
+        assertThat(headers.get("Content-Length"), is("73"));
+        assertThat(headers.get("content"), is("userId=javajigi&password=password&name=JaeSung&email=javajigi%40slipp.net"));
+
+    }
+
+    @Test
+    public void readHeaders_GET() throws IOException {
+        String input = "GET /user/create?userId=javajigi&password=password&name=JaeSung&email=javajigi%40slipp.net HTTP/1.1";
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+        Map<String, String> headers = HttpRequestUtils.readHeaders(in);
+
+        assertThat(headers.isEmpty(), is(Boolean.FALSE));
+        assertThat(headers.get("method"), is("GET"));
+        assertThat(headers.get("url"), is("/user/create"));
+        assertThat(headers.get("query"), is("userId=javajigi&password=password&name=JaeSung&email=javajigi%40slipp.net"));
     }
 
     @Test
