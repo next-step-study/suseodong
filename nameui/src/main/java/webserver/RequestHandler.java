@@ -103,7 +103,15 @@ public class RequestHandler extends Thread {
                         response401HeaderWithCookie(dos, body.length, "/user/login.html");
                         responseBody(dos, body);
                     }
-                } else {
+                }
+                else if(url.endsWith(".css")) {
+                    byte[] css = Files.readAllBytes(new File("webapp" + url).toPath());
+
+                    DataOutputStream dos = new DataOutputStream(out);
+                    responseCss(dos, css.length);
+                    responseBody(dos, css);
+                }
+                else {
                     // 요청 URL 에 해당하는 파일을 읽어서 전달
                     byte[] body = Files.readAllBytes(new File("webapp" + url).toPath());
 
@@ -161,6 +169,17 @@ public class RequestHandler extends Thread {
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Set-Cookie: logined=false\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void responseCss(DataOutputStream dos, int lengthOfCssContent) {
+        try {
+            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes("Accept: text/css,*/*;q=0.1\r\n");
+            dos.writeBytes("Content-Length: " + lengthOfCssContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
