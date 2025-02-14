@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -53,7 +54,7 @@ public class HttpRequestUtils {
         headers.put("query", "");
 
         if (line.split(" ")[1].split("\\?").length == 2) {
-            headers.put("query", line.split(" ")[1].split("\\?")[1]);
+            headers.put("query", URLDecoder.decode(line.split(" ")[1].split("\\?")[1], "UTF-8"));
         }
 
         // 다음 줄 부터는 ': ' 형식이므로 while 문 돌리기
@@ -72,7 +73,7 @@ public class HttpRequestUtils {
         }
 
         if (isPost) {
-            String content = IOUtils.readData(br, Integer.parseInt(headers.get("Content-Length")));
+            String content = URLDecoder.decode(IOUtils.readData(br, Integer.parseInt(headers.get("Content-Length"))), "UTF-8");
             headers.put("content", content);
         }
 

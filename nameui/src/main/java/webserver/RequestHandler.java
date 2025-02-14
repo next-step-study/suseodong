@@ -5,8 +5,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import constants.HttpMethod;
@@ -24,6 +22,7 @@ public class RequestHandler extends Thread {
 //    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private Socket connection;
+    private static final String BASE_URL = "webapp";
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
@@ -50,14 +49,14 @@ public class RequestHandler extends Thread {
                     User user = DataBase.findUserById(userString.get("userId"));
 
                     if (user != null && user.getPassword().equals(userString.get("password"))) { // 로그인 성공
-                        byte[] body = Files.readAllBytes(new File("webapp" + "/index.html").toPath());
+                        byte[] body = Files.readAllBytes(new File(BASE_URL + "/index.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
                         HttpResponseUtils.response302HeaderWithCookie(dos, body.length, "/index.html");
                         HttpResponseUtils.responseBody(dos, body);
                     }
                     else { // 로그인 실패
-                        byte[] body = Files.readAllBytes(new File("webapp" + "/user/login_failed.html").toPath());
+                        byte[] body = Files.readAllBytes(new File(BASE_URL + "/user/login_failed.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
                         HttpResponseUtils.response401HeaderWithCookie(dos, body.length, "/user/login_failed.html");
@@ -71,7 +70,7 @@ public class RequestHandler extends Thread {
                         User user = new User(userString.get("userId"), userString.get("password"), userString.get("name"), userString.get("email"));
                         DataBase.addUser(user);
 
-                        byte[] body = Files.readAllBytes(new File("webapp" + "/index.html").toPath());
+                        byte[] body = Files.readAllBytes(new File(BASE_URL + "/index.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
                         HttpResponseUtils.response302Header(dos, body.length, "/index.html");
@@ -85,7 +84,7 @@ public class RequestHandler extends Thread {
                     boolean isLogined = Boolean.parseBoolean(cookies.get("logined"));
 
                     if (isLogined) { // 로그인 상태
-                        String body = new String(Files.readAllBytes(new File("webapp" + "/user/list.html").toPath()));
+                        String body = new String(Files.readAllBytes(new File(BASE_URL + "/user/list.html").toPath()));
                         String userTableHtml = GenerateHtmlUtils.generateUserTableHtml(new ArrayList<>(DataBase.findAll()));
 
                         String resultStr = body.replace("                    {USER_TABLE}", userTableHtml);
@@ -98,7 +97,7 @@ public class RequestHandler extends Thread {
 
                     }
                     else { // 로그아웃 상태
-                        byte[] body = Files.readAllBytes(new File("webapp" + "/user/login.html").toPath());
+                        byte[] body = Files.readAllBytes(new File(BASE_URL + "/user/login.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
                         HttpResponseUtils.response401HeaderWithCookie(dos, body.length, "/user/login.html");
@@ -106,7 +105,7 @@ public class RequestHandler extends Thread {
                     }
                 }
                 else if(url.endsWith(".css")) {
-                    byte[] css = Files.readAllBytes(new File("webapp" + url).toPath());
+                    byte[] css = Files.readAllBytes(new File(BASE_URL + url).toPath());
 
                     DataOutputStream dos = new DataOutputStream(out);
                     HttpResponseUtils.responseCss(dos, css.length);
@@ -114,7 +113,7 @@ public class RequestHandler extends Thread {
                 }
                 else {
                     // 요청 URL 에 해당하는 파일을 읽어서 전달
-                    byte[] body = Files.readAllBytes(new File("webapp" + url).toPath());
+                    byte[] body = Files.readAllBytes(new File(BASE_URL + url).toPath());
 
                     DataOutputStream dos = new DataOutputStream(out);
                     HttpResponseUtils.response200Header(dos, body.length);

@@ -89,7 +89,7 @@ public class HttpRequestUtilsTest {
         assertThat(headers.get("Connection"), is("keep-alive"));
         assertThat(headers.get("Accept"), is("*/*"));
         assertThat(headers.get("Content-Length"), is("73"));
-        assertThat(headers.get("content"), is("userId=javajigi&password=password&name=JaeSung&email=javajigi%40slipp.net"));
+        assertThat(headers.get("content"), is("userId=javajigi&password=password&name=JaeSung&email=javajigi@slipp.net"));
 
     }
 
@@ -102,7 +102,7 @@ public class HttpRequestUtilsTest {
         assertThat(headers.isEmpty(), is(Boolean.FALSE));
         assertThat(headers.get("method"), is("GET"));
         assertThat(headers.get("url"), is("/user/create"));
-        assertThat(headers.get("query"), is("userId=javajigi&password=password&name=JaeSung&email=javajigi%40slipp.net"));
+        assertThat(headers.get("query"), is("userId=javajigi&password=password&name=JaeSung&email=javajigi@slipp.net"));
     }
 
     @Test
