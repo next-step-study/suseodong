@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import constants.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -57,7 +58,7 @@ public class HttpRequestUtils {
 
         // 다음 줄 부터는 ': ' 형식이므로 while 문 돌리기
         line = br.readLine();
-        boolean isPost = headers.get("method").equals("POST");
+        boolean isPost = headers.get("method").equals(HttpMethod.POST.getMethod());
         while(!"".equals(line)) {
             if (line == null) {
                 break;

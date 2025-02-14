@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import constants.HttpMethod;
 import db.DataBase;
 import lombok.extern.slf4j.Slf4j;
 import model.User;
@@ -23,7 +24,6 @@ public class RequestHandler extends Thread {
 //    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private Socket connection;
-//    private HttpRequestUtils httpRequestUtils = new HttpRequestUtils();
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
@@ -43,7 +43,7 @@ public class RequestHandler extends Thread {
             String url = headers.get("url");
 
             // POST, GET 구분
-            if ("POST".equals(headers.get("method"))) {
+            if (HttpMethod.POST.getMethod().equals(headers.get("method"))) {
                 if ("/user/login".equals(url)) {
                     Map<String, String> userString = HttpRequestUtils.parseQueryString(headers.get("content"));
 
@@ -79,7 +79,7 @@ public class RequestHandler extends Thread {
                     }
                 }
             }
-            else if("GET".equals(headers.get("method"))) {
+            else if(HttpMethod.GET.getMethod().equals(headers.get("method"))) {
                 if("/user/list".equals(url)) {
                     Map<String, String> cookies = HttpRequestUtils.parseCookies(headers.get("Cookie"));
                     boolean isLogined = Boolean.parseBoolean(cookies.get("logined"));
