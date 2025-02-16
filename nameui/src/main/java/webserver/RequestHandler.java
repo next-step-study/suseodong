@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import constants.HttpMethod;
+import constants.HttpStatus;
 import db.DataBase;
-import http.Header;
-import http.RequestLine;
+import http.request.Header;
+import http.request.RequestLine;
+import http.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import model.User;
 import util.GenerateHtmlUtils;
@@ -38,13 +40,13 @@ public class RequestHandler extends Thread {
             BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
             RequestLine requestLine = HttpRequestUtils.getRequestLine(br);
             Header header = HttpRequestUtils.getHeader(br, requestLine.getMethod());
-            log.info("header : \n{}", header);
+            log.info("header : \n{}", header.toString());
 
             // 헤더에서 첫 번째 라인 요청 URL 추출하기
             String url = requestLine.getUrl();
 
             // POST, GET 구분
-            if (HttpMethod.POST.getMethod().equals(requestLine.getMethod())) {
+            if (HttpMethod.POST.equals(requestLine.getMethod())) {
                 if ("/user/login".equals(url)) {
                     Map<String, String> userString = HttpRequestUtils.parseQueryString(header.getHeaderValue("content"));
 
@@ -54,15 +56,15 @@ public class RequestHandler extends Thread {
                         byte[] body = Files.readAllBytes(new File(BASE_URL + "/index.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
-                        HttpResponseUtils.response302HeaderWithCookie(dos, body.length, "/index.html");
-                        HttpResponseUtils.responseBody(dos, body);
+                        Response response = new Response(HttpStatus.HTTP_STATUS_302, "html", body, "logined=true", "/");
+                        response.createResponse(dos);
                     }
                     else { // 로그인 실패
                         byte[] body = Files.readAllBytes(new File(BASE_URL + "/user/login_failed.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
-                        HttpResponseUtils.response401HeaderWithCookie(dos, body.length, "/user/login_failed.html");
-                        HttpResponseUtils.responseBody(dos, body);
+                        Response response = new Response(HttpStatus.HTTP_STATUS_401, "html", body, "logined=false", "/user/login_failed");
+                        response.createResponse(dos);
                     }
                 }
                 else if (url.equals("/user/create")) {
@@ -75,12 +77,12 @@ public class RequestHandler extends Thread {
                         byte[] body = Files.readAllBytes(new File(BASE_URL + "/index.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
-                        HttpResponseUtils.response302Header(dos, body.length, "/index.html");
-                        HttpResponseUtils.responseBody(dos, body);
+                        Response response = new Response(HttpStatus.HTTP_STATUS_302, "html", body, null, "/index.html");
+                        response.createResponse(dos);
                     }
                 }
             }
-            else if(HttpMethod.GET.getMethod().equals(requestLine.getMethod())) {
+            else if(HttpMethod.GET.equals(requestLine.getMethod())) {
                 if("/user/list".equals(url)) {
                     Map<String, String> cookies = HttpRequestUtils.parseCookies(header.getHeaderValue("Cookie"));
                     boolean isLogined = Boolean.parseBoolean(cookies.get("logined"));
@@ -94,32 +96,39 @@ public class RequestHandler extends Thread {
                         // 응답 생성
                         byte[] result = resultStr.getBytes(StandardCharsets.UTF_8);
                         DataOutputStream dos = new DataOutputStream(out);
-                        HttpResponseUtils.response200Header(dos, result.length);
-                        HttpResponseUtils.responseBody(dos, result);
-
+                        Response response = new Response(HttpStatus.HTTP_STATUS_200, "html", result);
+                        response.createResponse(dos);
                     }
                     else { // 로그아웃 상태
                         byte[] body = Files.readAllBytes(new File(BASE_URL + "/user/login.html").toPath());
 
                         DataOutputStream dos = new DataOutputStream(out);
-                        HttpResponseUtils.response401HeaderWithCookie(dos, body.length, "/user/login.html");
-                        HttpResponseUtils.responseBody(dos, body);
+                        Response response = new Response(HttpStatus.HTTP_STATUS_401, "html", body, "logined=false", "/user/login");
+                        response.createResponse(dos);
                     }
                 }
                 else if(url.endsWith(".css")) {
                     byte[] css = Files.readAllBytes(new File(BASE_URL + url).toPath());
 
                     DataOutputStream dos = new DataOutputStream(out);
-                    HttpResponseUtils.responseCss(dos, css.length);
-                    HttpResponseUtils.responseBody(dos, css);
+                    Response response = new Response(HttpStatus.HTTP_STATUS_200, "css", css);
+                    response.createResponse(dos);
+                }
+                else if("/".equals(url)){
+                    // 요청 URL 에 해당하는 파일을 읽어서 전달
+                    byte[] body = Files.readAllBytes(new File(BASE_URL + "/index.html").toPath());
+
+                    DataOutputStream dos = new DataOutputStream(out);
+                    Response response = new Response(HttpStatus.HTTP_STATUS_200, "html", body);
+                    response.createResponse(dos);
                 }
                 else {
                     // 요청 URL 에 해당하는 파일을 읽어서 전달
                     byte[] body = Files.readAllBytes(new File(BASE_URL + url).toPath());
 
                     DataOutputStream dos = new DataOutputStream(out);
-                    HttpResponseUtils.response200Header(dos, body.length);
-                    HttpResponseUtils.responseBody(dos, body);
+                    Response response = new Response(HttpStatus.HTTP_STATUS_200, "html", body);
+                    response.createResponse(dos);
                 }
             }
 
