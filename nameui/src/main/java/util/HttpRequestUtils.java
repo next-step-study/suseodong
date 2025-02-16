@@ -2,16 +2,15 @@ package util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import constants.HttpMethod;
+import http.Header;
+import http.RequestLine;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -34,32 +33,26 @@ public class HttpRequestUtils {
         return parseValues(cookies, ";");
     }
 
-    public static String[] parseURL(String line) {
-        String[] tokens = line.split(" ");
-        return tokens[1].split("\\?");
-    }
-
-    public static Map<String, String> readHeaders(InputStream in) throws IOException {
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-        Map<String, String> headers = new HashMap<>();
+    public static RequestLine getRequestLine(BufferedReader br) throws IOException {
         String line = br.readLine();
         if(line == null) {
-            return new HashMap<>();
+            throw new RuntimeException();
         }
-
-        // method, url, query 처리
-        headers.put("method", line.split(" ")[0]);
-        headers.put("url", line.split(" ")[1].split("\\?")[0]);
-        headers.put("query", "");
 
         if (line.split(" ")[1].split("\\?").length == 2) {
-            headers.put("query", URLDecoder.decode(line.split(" ")[1].split("\\?")[1], "UTF-8"));
+            return new RequestLine(line.split(" ")[0], line.split(" ")[1].split("\\?")[0], URLDecoder.decode(line.split(" ")[1].split("\\?")[1], "UTF-8"));
         }
 
+        return new RequestLine(line.split(" ")[0], line.split(" ")[1].split("\\?")[0], "");
+    }
+
+    public static Header getHeader(BufferedReader br, String httpMethod) throws IOException {
+
+        Map<String, String> header = new HashMap<>();
+
         // 다음 줄 부터는 ': ' 형식이므로 while 문 돌리기
-        line = br.readLine();
-        boolean isPost = headers.get("method").equals(HttpMethod.POST.getMethod());
+        String line = br.readLine();
+        boolean isPost = httpMethod.equals(HttpMethod.POST.getMethod());
         while(!"".equals(line)) {
             if (line == null) {
                 break;
@@ -68,16 +61,16 @@ public class HttpRequestUtils {
             String key = parseHeader(line).getKey();
             String value = parseHeader(line).getValue();
 
-            headers.put(key, value);
+            header.put(key, value);
             line = br.readLine();
         }
 
         if (isPost) {
-            String content = URLDecoder.decode(IOUtils.readData(br, Integer.parseInt(headers.get("Content-Length"))), "UTF-8");
-            headers.put("content", content);
+            String content = URLDecoder.decode(IOUtils.readData(br, Integer.parseInt(header.get("Content-Length"))), "UTF-8");
+            header.put("content", content);
         }
 
-        return headers;
+        return new Header(header);
     }
 
     private static Map<String, String> parseValues(String values, String separator) {
