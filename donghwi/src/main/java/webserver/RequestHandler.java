@@ -61,7 +61,7 @@ public class RequestHandler extends Thread {
                     Get.issue0(dos);
                 }
                 //요구사항 - 1
-                if (url.equals("/index.html")) {
+                if (url.endsWith(".html")) {
                     Get.issue1(dos, header);
                 }
                 //요구사항 - 2
@@ -86,10 +86,16 @@ public class RequestHandler extends Thread {
                         .forEach(arr -> bodies.put(arr[0], arr[1]));
             }
 
+            log.debug("Response Body: {}", bodies);
+
             if(header.get(0)[0].equals("POST")) {
                 //요구사항 - 3
                 if(url.startsWith("/user/create")) {
                     Post.issue3(dos, bodies, contentLength);
+                }
+                //로그인
+                if(url.startsWith("/user/login")) {
+                    Post.userLogin(dos, bodies, contentLength);
                 }
             }
         } catch (IOException e) {

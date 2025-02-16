@@ -23,4 +23,19 @@ public class Post {
 
         ResponseHeader.response302Header(dos, "/index.html");
     }
+
+    public static void userLogin(DataOutputStream dos, Map<String, String> bodies, int contentLength) {
+        String userId = bodies.get("userId");
+        String password = bodies.get("password");
+
+        User user = DataBase.findUserById(userId);
+
+        if(user != null && user.getPassword().equals(password)) {
+            log.info("user logged success : {}", userId);
+            ResponseHeader.response302LoginSuccessHeader(dos);
+        } else {
+            log.info("user logged failed: {}", userId);
+            ResponseHeader.response302LoginFailHeader(dos);
+        }
+    }
 }

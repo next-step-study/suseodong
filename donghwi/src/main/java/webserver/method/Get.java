@@ -30,12 +30,10 @@ public class Get {
         String[] loginInfo = header.get(0)[1].substring(13).split("&");
         for(String info : loginInfo) {
             String[] userInfo = info.split("=");
-            if(userInfo[0].equals("userId")) {
-                userId = userInfo[1];
-            } else if(userInfo[0].equals("password")) {
-                password = userInfo[1];
-            } else if(userInfo[0].equals("name")) {
-                name = userInfo[1];
+            switch (userInfo[0]) {
+                case "userId" -> userId = userInfo[1];
+                case "password" -> password = userInfo[1];
+                case "name" -> name = userInfo[1];
             }
         }
         User user = new User(userId, password, name, null);
