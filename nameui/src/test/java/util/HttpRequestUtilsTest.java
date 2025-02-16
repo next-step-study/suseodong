@@ -6,8 +6,9 @@ import static org.junit.Assert.*;
 import java.io.*;
 import java.util.Map;
 
-import http.Header;
-import http.RequestLine;
+import constants.HttpMethod;
+import http.request.Header;
+import http.request.RequestLine;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -86,7 +87,7 @@ public class HttpRequestUtilsTest {
         Header header = HttpRequestUtils.getHeader(br, requestLine.getMethod());
 
         assertThat(header, not(nullValue()));
-        assertThat(requestLine.getMethod(), is("POST"));
+        assertThat(requestLine.getMethod(), is(HttpMethod.POST));
         assertThat(requestLine.getUrl(), is("/index.html"));
         assertThat(requestLine.getQuery(), is(""));
         assertThat(header.getHeaderValue("Host"), is("localhost:8080"));
@@ -106,7 +107,7 @@ public class HttpRequestUtilsTest {
         Header header = HttpRequestUtils.getHeader(br, requestLine.getMethod());
 
         assertThat(header, not(nullValue()));
-        assertThat(requestLine.getMethod(), is("GET"));
+        assertThat(requestLine.getMethod(), is(HttpMethod.GET));
         assertThat(requestLine.getUrl(), is("/user/create"));
         assertThat(requestLine.getQuery(), is("userId=javajigi&password=password&name=JaeSung&email=javajigi@slipp.net"));
         assertThat(header.getHeaderValue("Host"), is("localhost:8080"));

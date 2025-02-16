@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import constants.HttpMethod;
-import http.Header;
-import http.RequestLine;
+import http.request.Header;
+import http.request.RequestLine;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -35,24 +35,29 @@ public class HttpRequestUtils {
 
     public static RequestLine getRequestLine(BufferedReader br) throws IOException {
         String line = br.readLine();
-        if(line == null) {
-            throw new RuntimeException();
+
+        // http method
+        HttpMethod httpMethod;
+        if ("POST".equals(line.split(" ")[0])) {
+            httpMethod = HttpMethod.POST;
+        } else {
+            httpMethod = HttpMethod.GET;
         }
 
         if (line.split(" ")[1].split("\\?").length == 2) {
-            return new RequestLine(line.split(" ")[0], line.split(" ")[1].split("\\?")[0], URLDecoder.decode(line.split(" ")[1].split("\\?")[1], "UTF-8"));
+            return new RequestLine(httpMethod, line.split(" ")[1].split("\\?")[0], URLDecoder.decode(line.split(" ")[1].split("\\?")[1], "UTF-8"));
         }
 
-        return new RequestLine(line.split(" ")[0], line.split(" ")[1].split("\\?")[0], "");
+        return new RequestLine(httpMethod, line.split(" ")[1].split("\\?")[0], "");
     }
 
-    public static Header getHeader(BufferedReader br, String httpMethod) throws IOException {
+    public static Header getHeader(BufferedReader br, HttpMethod httpMethod) throws IOException {
 
         Map<String, String> header = new HashMap<>();
 
         // 다음 줄 부터는 ': ' 형식이므로 while 문 돌리기
         String line = br.readLine();
-        boolean isPost = httpMethod.equals(HttpMethod.POST.getMethod());
+        boolean isPost = httpMethod.equals(HttpMethod.POST);
         while(!"".equals(line)) {
             if (line == null) {
                 break;

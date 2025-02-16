@@ -1,15 +1,16 @@
-package http;
+package http.request;
 
+import constants.HttpMethod;
 import lombok.Getter;
 
 @Getter
 public class RequestLine {
 
-    private final String method;
+    private final HttpMethod method;
     private final String url;
     private final String query;
 
-    public RequestLine(String method, String url, String query) {
+    public RequestLine(HttpMethod method, String url, String query) {
         this.method = method;
         this.url = url;
         this.query = query;

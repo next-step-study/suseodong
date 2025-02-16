@@ -1,5 +1,8 @@
 package constants;
 
+import lombok.Getter;
+
+@Getter
 public enum HttpMethod {
     GET("GET"),
     POST("POST");
@@ -8,9 +11,5 @@ public enum HttpMethod {
 
     HttpMethod(String method) {
         this.method = method;
-    }
-
-    public String getMethod() {
-        return method;
     }
 }

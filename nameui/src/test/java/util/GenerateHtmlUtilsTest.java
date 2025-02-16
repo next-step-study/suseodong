@@ -13,7 +13,6 @@ import static org.junit.Assert.assertThat;
 
 public class GenerateHtmlUtilsTest extends TestCase {
 
-    @Test
     public void testGenerateUserTableHtml() {
         //given
         List<User> users = new ArrayList<>();
