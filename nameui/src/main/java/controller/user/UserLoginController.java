@@ -30,7 +30,7 @@ public class UserLoginController implements Controller {
         else { // 로그인 실패
             byte[] body = Files.readAllBytes(new File(BASE_URL + "/user/login_failed.html").toPath());
 
-            return new Response(HttpStatus.HTTP_STATUS_401, "html", body, "logined=false", "/user/login_failed");
+            return new Response(HttpStatus.HTTP_STATUS_302, "html", body, "logined=false", "/user/login_failed.html");
         }
     }
 }

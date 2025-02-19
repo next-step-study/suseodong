@@ -31,14 +31,12 @@ public class UserListController implements Controller {
 
             // 응답 생성
             byte[] result = resultStr.getBytes(StandardCharsets.UTF_8);
-            Response response = new Response(HttpStatus.HTTP_STATUS_200, "html", result);
-//            response.createResponse(dos);
-            return response;
+            return new Response(HttpStatus.HTTP_STATUS_200, "html", result);
         }
         else { // 로그아웃 상태
             byte[] body = Files.readAllBytes(new File(BASE_URL + "/user/login.html").toPath());
 
-            return new Response(HttpStatus.HTTP_STATUS_401, "html", body, "logined=false", "/user/login");
+            return new Response(HttpStatus.HTTP_STATUS_302, "html", body, "logined=false", "/user/login.html");
         }
     }
 }
