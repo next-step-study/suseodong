@@ -7,12 +7,12 @@ import lombok.Getter;
 public class RequestLine {
 
     private final HttpMethod method;
-    private final String url;
+    private final String uri;
     private final String query;
 
-    public RequestLine(HttpMethod method, String url, String query) {
+    public RequestLine(HttpMethod method, String uri, String query) {
         this.method = method;
-        this.url = url;
+        this.uri = uri;
         this.query = query;
     }
 }

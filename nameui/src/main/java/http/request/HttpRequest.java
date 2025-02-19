@@ -30,8 +30,8 @@ public class HttpRequest implements Request {
         return HttpRequestUtils.parseQueryString(requestLine.getQuery());
     }
 
-    public String getRequestURL() {
-        return requestLine.getUrl();
+    public String getRequestURI() {
+        return requestLine.getUri();
     }
 
     public HttpMethod getRequestMethod() {

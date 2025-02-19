@@ -88,7 +88,7 @@ public class HttpRequestUtilsTest {
 
         assertThat(header, not(nullValue()));
         assertThat(requestLine.getMethod(), is(HttpMethod.POST));
-        assertThat(requestLine.getUrl(), is("/index.html"));
+        assertThat(requestLine.getUri(), is("/index.html"));
         assertThat(requestLine.getQuery(), is(""));
         assertThat(header.getHeaderValue("Host"), is("localhost:8080"));
         assertThat(header.getHeaderValue("Connection"), is("keep-alive"));
@@ -106,7 +106,7 @@ public class HttpRequestUtilsTest {
 
         assertThat(header, not(nullValue()));
         assertThat(requestLine.getMethod(), is(HttpMethod.GET));
-        assertThat(requestLine.getUrl(), is("/user/create"));
+        assertThat(requestLine.getUri(), is("/user/create"));
         assertThat(requestLine.getQuery(), is("userId=javajigi&password=password&name=JaeSung&email=javajigi@slipp.net"));
         assertThat(header.getHeaderValue("Host"), is("localhost:8080"));
         assertThat(header.getHeaderValue("Connection"), is("keep-alive"));

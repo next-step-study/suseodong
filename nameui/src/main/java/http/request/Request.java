@@ -8,7 +8,7 @@ public interface Request {
     Map<String, String> getCookies();
     String getHeader(String key);
     Map<String, String> getQueries();
-    String getRequestURL();
+    String getRequestURI();
     HttpMethod getRequestMethod();
     Map<String, String> getBody();
 }
