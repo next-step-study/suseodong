@@ -84,7 +84,7 @@ public class HttpRequestUtilsTest {
         InputStream in = new ByteArrayInputStream(input.getBytes());
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         RequestLine requestLine = HttpRequestUtils.getRequestLine(br);
-        Header header = HttpRequestUtils.getHeader(br, requestLine.getMethod());
+        Header header = HttpRequestUtils.getHeader(br);
 
         assertThat(header, not(nullValue()));
         assertThat(requestLine.getMethod(), is(HttpMethod.POST));
@@ -94,8 +94,6 @@ public class HttpRequestUtilsTest {
         assertThat(header.getHeaderValue("Connection"), is("keep-alive"));
         assertThat(header.getHeaderValue("Accept"), is("*/*"));
         assertThat(header.getHeaderValue("Content-Length"), is("73"));
-        assertThat(header.getHeaderValue("content"), is("userId=javajigi&password=password&name=JaeSung&email=javajigi@slipp.net"));
-
     }
 
     @Test
@@ -104,7 +102,7 @@ public class HttpRequestUtilsTest {
         InputStream in = new ByteArrayInputStream(input.getBytes());
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         RequestLine requestLine = HttpRequestUtils.getRequestLine(br);
-        Header header = HttpRequestUtils.getHeader(br, requestLine.getMethod());
+        Header header = HttpRequestUtils.getHeader(br);
 
         assertThat(header, not(nullValue()));
         assertThat(requestLine.getMethod(), is(HttpMethod.GET));
@@ -112,5 +110,18 @@ public class HttpRequestUtilsTest {
         assertThat(requestLine.getQuery(), is("userId=javajigi&password=password&name=JaeSung&email=javajigi@slipp.net"));
         assertThat(header.getHeaderValue("Host"), is("localhost:8080"));
         assertThat(header.getHeaderValue("Connection"), is("keep-alive"));
+    }
+
+    @Test
+    public void getBody() throws IOException {
+        String input = "POST /index.html HTTP/1.1\nHost: localhost:8080\nConnection: keep-alive\nAccept: */*\nContent-Length: 73\n" +
+                "\nuserId=javajigi&password=password&name=JaeSung&email=javajigi%40slipp.net";
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        RequestLine requestLine = HttpRequestUtils.getRequestLine(br);
+        Header header = HttpRequestUtils.getHeader(br);
+        String body = HttpRequestUtils.getBody(br, requestLine.getMethod(), header.getHeaderValue("Content-Length"));
+
+        assertThat(body, is("userId=javajigi&password=password&name=JaeSung&email=javajigi@slipp.net"));
     }
 }

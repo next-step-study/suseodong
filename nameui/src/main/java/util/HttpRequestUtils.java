@@ -36,6 +36,10 @@ public class HttpRequestUtils {
     public static RequestLine getRequestLine(BufferedReader br) throws IOException {
         String line = br.readLine();
 
+        if (line == null) {
+            throw new IOException();
+        }
+
         // http method
         HttpMethod httpMethod;
         if ("POST".equals(line.split(" ")[0])) {
@@ -51,13 +55,12 @@ public class HttpRequestUtils {
         return new RequestLine(httpMethod, line.split(" ")[1].split("\\?")[0], "");
     }
 
-    public static Header getHeader(BufferedReader br, HttpMethod httpMethod) throws IOException {
+    public static Header getHeader(BufferedReader br) throws IOException {
 
         Map<String, String> header = new HashMap<>();
 
         // 다음 줄 부터는 ': ' 형식이므로 while 문 돌리기
         String line = br.readLine();
-        boolean isPost = httpMethod.equals(HttpMethod.POST);
         while(!"".equals(line)) {
             if (line == null) {
                 break;
@@ -70,12 +73,20 @@ public class HttpRequestUtils {
             line = br.readLine();
         }
 
-        if (isPost) {
-            String content = URLDecoder.decode(IOUtils.readData(br, Integer.parseInt(header.get("Content-Length"))), "UTF-8");
-            header.put("content", content);
-        }
+//        if (isPost) {
+//            String content = URLDecoder.decode(IOUtils.readData(br, Integer.parseInt(header.get("Content-Length"))), "UTF-8");
+//            header.put("content", content);
+//        }
 
         return new Header(header);
+    }
+
+    public static String getBody(BufferedReader br, HttpMethod httpMethod, String contentLength) throws IOException {
+        boolean isPost = httpMethod.equals(HttpMethod.POST);
+        if (isPost) {
+            return URLDecoder.decode(IOUtils.readData(br, Integer.parseInt(contentLength)), "UTF-8");
+        }
+        return null;
     }
 
     private static Map<String, String> parseValues(String values, String separator) {
@@ -109,7 +120,7 @@ public class HttpRequestUtils {
         String key;
         String value;
 
-        Pair(String key, String value) {
+        public Pair(String key, String value) {
             this.key = key.trim();
             this.value = value.trim();
         }
