@@ -7,8 +7,7 @@ import java.util.Map;
 public interface Request {
     Map<String, String> getCookies();
     String getHeader(String key);
-    Map<String, String> getQueries();
+    String getParameters(String key);
     String getRequestURI();
     HttpMethod getRequestMethod();
-    Map<String, String> getBody();
 }

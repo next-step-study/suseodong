@@ -18,11 +18,10 @@ import static webserver.RequestHandler.BASE_URL;
 public class UserLoginController implements Controller {
     @Override
     public Response process(Request request, DataOutputStream dos) throws IOException {
-        Map<String, String> userString = request.getBody();
 
-        User user = DataBase.findUserById(userString.get("userId"));
+        User user = DataBase.findUserById(request.getParameters("userId"));
 
-        if (user != null && user.getPassword().equals(userString.get("password"))) { // 로그인 성공
+        if (user != null && user.getPassword().equals(request.getParameters("password"))) { // 로그인 성공
             byte[] body = Files.readAllBytes(new File(BASE_URL + "/index.html").toPath());
 
             return new Response(HttpStatus.HTTP_STATUS_302, "html", body, "logined=true", "/");
