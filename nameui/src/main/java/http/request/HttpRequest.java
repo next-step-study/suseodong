@@ -1,6 +1,7 @@
 package http.request;
 
 import constants.HttpMethod;
+import lombok.Getter;
 import util.HttpParserUtils;
 import util.IOUtils;
 
@@ -118,5 +119,31 @@ public class HttpRequest implements Request {
     private String getPathVariable(String path) {
         String[] value = path.split("/");
         return value[value.length-1];
+    }
+}
+
+@Getter
+class RequestLine {
+
+    private final HttpMethod method;
+    private final String uri;
+    private final String query;
+
+    public RequestLine(HttpMethod method, String uri, String query) {
+        this.method = method;
+        this.uri = uri;
+        this.query = query;
+    }
+}
+
+class Header {
+    private final Map<String, String> header;
+
+    public Header(Map<String, String> header) {
+        this.header = header;
+    }
+
+    public String getHeaderValue(String value) {
+        return header.get(value);
     }
 }
