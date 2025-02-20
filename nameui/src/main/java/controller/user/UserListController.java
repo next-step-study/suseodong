@@ -4,7 +4,8 @@ import constants.HttpStatus;
 import controller.Controller;
 import db.DataBase;
 import http.request.Request;
-import http.response.Response;
+import http.response.HttpResponse;
+import http.response.ResponseData;
 import util.GenerateHtmlUtils;
 
 import java.io.DataOutputStream;
@@ -19,7 +20,7 @@ import static webserver.RequestHandler.BASE_URL;
 
 public class UserListController implements Controller {
     @Override
-    public Response process(Request request, DataOutputStream dos) throws IOException {
+    public HttpResponse process(Request request, DataOutputStream dos) throws IOException {
         Map<String, String> cookies = request.getCookies();
         boolean isLogined = Boolean.parseBoolean(cookies.get("logined"));
 
@@ -31,12 +32,17 @@ public class UserListController implements Controller {
 
             // 응답 생성
             byte[] result = resultStr.getBytes(StandardCharsets.UTF_8);
-            return new Response(HttpStatus.HTTP_STATUS_200, "html", result);
+
+            ResponseData responseData = ResponseData.builder().httpStatus(HttpStatus.HTTP_STATUS_200).contentType("html").body(result).build();
+            return new HttpResponse(responseData);
         }
         else { // 로그아웃 상태
             byte[] body = Files.readAllBytes(new File(BASE_URL + "/user/login.html").toPath());
 
-            return new Response(HttpStatus.HTTP_STATUS_302, "html", body, "logined=false", "/user/login.html");
+            ResponseData responseData = ResponseData.builder().httpStatus(HttpStatus.HTTP_STATUS_302)
+                                        .contentType("html").body(body).cookie("logined=false")
+                                        .location("/user/login.html").build();
+            return new HttpResponse(responseData);
         }
     }
 }

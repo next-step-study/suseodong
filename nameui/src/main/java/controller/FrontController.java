@@ -9,7 +9,7 @@ import controller.user.UserListController;
 import controller.user.UserLoginController;
 import controller.user.UserSaveController;
 import http.request.Request;
-import http.response.Response;
+import http.response.HttpResponse;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -52,10 +52,10 @@ public class FrontController {
         HandlerAdapter adapter = getHandlerAdapter(handler);
 
         // 어댑터 호출 : 그 결과를 어댑터에 맞추어 반환
-        Response response = adapter.handle(request, dos, handler);
+        HttpResponse httpResponse = adapter.handle(request, dos, handler);
 
         // 응답(viewResolver 역할)
-        response.createResponse(dos);
+        httpResponse.forward(dos);
     }
 
     // 핸들러 매핑 : URL 에 매핑된 핸들러(컨트롤러) 객체 반환

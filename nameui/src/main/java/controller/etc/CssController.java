@@ -3,7 +3,8 @@ package controller.etc;
 import constants.HttpStatus;
 import controller.Controller;
 import http.request.Request;
-import http.response.Response;
+import http.response.HttpResponse;
+import http.response.ResponseData;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -14,10 +15,11 @@ import static webserver.RequestHandler.BASE_URL;
 
 public class CssController implements Controller {
     @Override
-    public Response process(Request request, DataOutputStream dos) throws IOException {
+    public HttpResponse process(Request request, DataOutputStream dos) throws IOException {
         String url = request.getRequestURI();
         byte[] css = Files.readAllBytes(new File(BASE_URL + url).toPath());
 
-        return new Response(HttpStatus.HTTP_STATUS_200, "css", css);
+        ResponseData responseData = ResponseData.builder().httpStatus(HttpStatus.HTTP_STATUS_200).contentType("css").body(css).build();
+        return new HttpResponse(responseData);
     }
 }
