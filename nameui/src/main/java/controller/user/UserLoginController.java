@@ -1,15 +1,14 @@
 package controller.user;
 
+import constants.HttpMethod;
 import constants.HttpStatus;
 import controller.Controller;
 import db.DataBase;
 import http.request.Request;
-import http.response.HttpResponse;
 import http.response.Response;
 import http.response.ResponseData;
 import model.User;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,7 +18,12 @@ import static webserver.RequestHandler.BASE_URL;
 public class UserLoginController implements Controller {
     @Override
     public void process(Request request, Response response) throws IOException {
+        if (request.getRequestMethod().equals(HttpMethod.POST)) {
+            doPost(request, response);
+        }
+    }
 
+    private void doPost(Request request, Response response) throws IOException {
         User user = DataBase.findUserById(request.getParameters("userId"));
 
         if (user != null && user.getPassword().equals(request.getParameters("password"))) { // 로그인 성공

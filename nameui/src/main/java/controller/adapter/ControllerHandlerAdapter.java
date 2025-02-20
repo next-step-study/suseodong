@@ -2,10 +2,8 @@ package controller.adapter;
 
 import controller.Controller;
 import http.request.Request;
-import http.response.HttpResponse;
 import http.response.Response;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class ControllerHandlerAdapter implements HandlerAdapter {
