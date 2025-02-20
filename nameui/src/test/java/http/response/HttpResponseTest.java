@@ -20,8 +20,8 @@ public class HttpResponseTest {
         DataOutputStream dos = new DataOutputStream(byteArrayOutputStream);
 
         // when
-        Response response = new HttpResponse(responseData);
-        response.forward(dos);
+        Response response = new HttpResponse(dos);
+        response.forward(responseData);
 
         // then
         String result = byteArrayOutputStream.toString("UTF-8");
@@ -40,8 +40,8 @@ public class HttpResponseTest {
         DataOutputStream dos = new DataOutputStream(byteArrayOutputStream);
 
         // when
-        Response response = new HttpResponse(responseData);
-        response.forward(dos);
+        Response response = new HttpResponse(dos);
+        response.forward(responseData);
 
         // then
         String result = byteArrayOutputStream.toString("UTF-8");
@@ -59,8 +59,8 @@ public class HttpResponseTest {
         DataOutputStream dos = new DataOutputStream(byteArrayOutputStream);
 
         // when
-        Response response = new HttpResponse(responseData);
-        response.forward(dos);
+        Response response = new HttpResponse(dos);
+        response.forward(responseData);
 
         // then
         String result = byteArrayOutputStream.toString("UTF-8");
@@ -80,8 +80,8 @@ public class HttpResponseTest {
         DataOutputStream dos = new DataOutputStream(byteArrayOutputStream);
 
         // when
-        Response response = new HttpResponse(responseData);
-        response.forward(dos);
+        Response response = new HttpResponse(dos);
+        response.forward(responseData);
 
         // then
         String result = byteArrayOutputStream.toString("UTF-8");

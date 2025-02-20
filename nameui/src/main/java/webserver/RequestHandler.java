@@ -5,6 +5,8 @@ import java.net.Socket;
 import controller.FrontController;
 import http.request.HttpRequest;
 import http.request.Request;
+import http.response.HttpResponse;
+import http.response.Response;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -26,18 +28,15 @@ public class RequestHandler extends Thread {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
             // http 요청 처리
             Request request = new HttpRequest(in);
+            Response response = new HttpResponse(new DataOutputStream(out));
 
             // FrontController 에게 요청 전달
             FrontController frontController = new FrontController();
-            frontController.service(request, new DataOutputStream(out));
+            frontController.service(request, response);
 
         }
         catch (RuntimeException | IOException e) {
             log.error(e.getMessage());
         }
     }
-
-
-
-
 }

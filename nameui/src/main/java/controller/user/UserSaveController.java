@@ -5,6 +5,7 @@ import controller.Controller;
 import db.DataBase;
 import http.request.Request;
 import http.response.HttpResponse;
+import http.response.Response;
 import http.response.ResponseData;
 import model.User;
 
@@ -17,7 +18,7 @@ import static webserver.RequestHandler.BASE_URL;
 
 public class UserSaveController implements Controller {
     @Override
-    public HttpResponse process(Request request, DataOutputStream dos) throws IOException {
+    public void process(Request request, Response response) throws IOException {
 
         User user = new User(request.getParameters("userId"), request.getParameters("password"), request.getParameters("name"), request.getParameters("email"));
         DataBase.addUser(user);
@@ -27,6 +28,6 @@ public class UserSaveController implements Controller {
         ResponseData responseData = ResponseData.builder().httpStatus(HttpStatus.HTTP_STATUS_302)
                 .contentType("html").body(body)
                 .location("/index.html").build();
-        return new HttpResponse(responseData);
+        response.forward(responseData);
     }
 }

@@ -10,6 +10,7 @@ import controller.user.UserLoginController;
 import controller.user.UserSaveController;
 import http.request.Request;
 import http.response.HttpResponse;
+import http.response.Response;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class FrontController {
         handlerAdapters.add(new ControllerHandlerAdapter());
     }
 
-    public void service(Request request, DataOutputStream dos) throws IOException {
+    public void service(Request request, Response response) throws IOException {
         Object handler = getHandler(request);
 
         if (handler == null) {
@@ -51,11 +52,8 @@ public class FrontController {
         // 어댑터 찾기
         HandlerAdapter adapter = getHandlerAdapter(handler);
 
-        // 어댑터 호출 : 그 결과를 어댑터에 맞추어 반환
-        HttpResponse httpResponse = adapter.handle(request, dos, handler);
-
-        // 응답(viewResolver 역할)
-        httpResponse.forward(dos);
+        // 어댑터 호출 : 여기서 로직 모두 수행되는 것
+        adapter.handle(request, response, handler);
     }
 
     // 핸들러 매핑 : URL 에 매핑된 핸들러(컨트롤러) 객체 반환

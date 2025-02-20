@@ -7,13 +7,13 @@ import java.io.IOException;
 
 @Slf4j
 public class HttpResponse implements Response {
-    private final ResponseData responseData;
+    private final DataOutputStream dos;
 
-    public HttpResponse(ResponseData responseData) {
-        this.responseData = responseData;
+    public HttpResponse(DataOutputStream dos) {
+        this.dos = dos;
     }
 
-    public void forward(DataOutputStream dos) {
+    public void forward(ResponseData responseData) {
         try {
             // header 생성
             dos.writeBytes("HTTP/1.1 " + responseData.getHttpStatus().getStatus() + " " + responseData.getHttpStatus().getMessage() + " \r\n");

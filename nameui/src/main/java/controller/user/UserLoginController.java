@@ -5,6 +5,7 @@ import controller.Controller;
 import db.DataBase;
 import http.request.Request;
 import http.response.HttpResponse;
+import http.response.Response;
 import http.response.ResponseData;
 import model.User;
 
@@ -17,7 +18,7 @@ import static webserver.RequestHandler.BASE_URL;
 
 public class UserLoginController implements Controller {
     @Override
-    public HttpResponse process(Request request, DataOutputStream dos) throws IOException {
+    public void process(Request request, Response response) throws IOException {
 
         User user = DataBase.findUserById(request.getParameters("userId"));
 
@@ -27,7 +28,7 @@ public class UserLoginController implements Controller {
             ResponseData responseData = ResponseData.builder().httpStatus(HttpStatus.HTTP_STATUS_302)
                     .contentType("html").body(body).cookie("logined=true")
                     .location("/").build();
-            return new HttpResponse(responseData);
+            response.forward(responseData);
         }
         else { // 로그인 실패
             byte[] body = Files.readAllBytes(new File(BASE_URL + "/user/login_failed.html").toPath());
@@ -35,7 +36,7 @@ public class UserLoginController implements Controller {
             ResponseData responseData = ResponseData.builder().httpStatus(HttpStatus.HTTP_STATUS_302)
                     .contentType("html").body(body).cookie("logined=false")
                     .location("/user/login_failed.html").build();
-            return new HttpResponse(responseData);
+            response.forward(responseData);
         }
     }
 }
