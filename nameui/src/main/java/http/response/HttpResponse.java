@@ -30,21 +30,6 @@ public class HttpResponse implements Response {
             } else { // 302 응답
                 sendRedirect();
             }
-//            // header 생성
-//            dos.writeBytes("HTTP/1.1 " + responseData.getHttpStatus().getStatus() + " " + responseData.getHttpStatus().getMessage() + " \r\n");
-//            if (responseData.getLocation() != null) { // 리다이렉트 설정
-//                dos.writeBytes("Location: http://localhost:8080" + responseData.getLocation() + "\r\n");
-//            }
-//            dos.writeBytes("Content-Type: text/" + responseData.getContentType() + ";charset=utf-8\r\n");
-//            if (responseData.getCookie() != null) {
-//                dos.writeBytes("Set-Cookie: " + responseData.getCookie() + "\r\n");
-//            }
-//            dos.writeBytes("Content-Length: " + responseData.getBody().length + "\r\n");
-//            dos.writeBytes("\r\n");
-//
-//            // body 생성
-//            dos.write(responseData.getBody(), 0, responseData.getBody().length);
-//            dos.flush();
         } catch (IOException e) {
             log.error(e.getMessage());
         }
@@ -119,13 +104,13 @@ public class HttpResponse implements Response {
     }
 
     @Override
-    public Map<String, String> getCookie() {
-        return cookie;
+    public String getCookie(String key) {
+        return cookie.get(key);
     }
 
     @Override
-    public Map<String, String> getHeader() {
-        return headers;
+    public String getHeader(String key) {
+        return headers.get(key);
     }
 
     @Override

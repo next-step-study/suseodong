@@ -2,7 +2,6 @@ package http.response;
 
 import constants.HttpStatus;
 
-import java.io.DataOutputStream;
 import java.util.Map;
 
 public interface Response {
@@ -11,7 +10,7 @@ public interface Response {
     void addHeader(String key, String value);
     void setStatus(HttpStatus httpStatus);
     void setBody(byte[] body);
-    Map<String, String> getCookie();
-    Map<String, String> getHeader();
+    String getCookie(String key);
+    String getHeader(String key);
     HttpStatus getStatus();
 }
