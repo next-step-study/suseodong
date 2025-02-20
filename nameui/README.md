@@ -1,24 +1,33 @@
-# 실습을 위한 개발 환경 세팅
-* https://github.com/slipp/web-application-server 프로젝트를 자신의 계정으로 Fork한다. Github 우측 상단의 Fork 버튼을 클릭하면 자신의 계정으로 Fork된다.
-* Fork한 프로젝트를 eclipse 또는 터미널에서 clone 한다.
-* Fork한 프로젝트를 eclipse로 import한 후에 Maven 빌드 도구를 활용해 eclipse 프로젝트로 변환한다.(mvn eclipse:clean eclipse:eclipse)
-* 빌드가 성공하면 반드시 refresh(fn + f5)를 실행해야 한다.
-
-# 웹 서버 시작 및 테스트
-* webserver.WebServer 는 사용자의 요청을 받아 RequestHandler에 작업을 위임하는 클래스이다.
-* 사용자 요청에 대한 모든 처리는 RequestHandler 클래스의 run() 메서드가 담당한다.
-* WebServer를 실행한 후 브라우저에서 http://localhost:8080으로 접속해 "Hello World" 메시지가 출력되는지 확인한다.
-
 # 각 요구사항별 학습 내용 정리
 * 구현 단계에서는 각 요구사항을 구현하는데 집중한다. 
 * 구현을 완료한 후 구현 과정에서 새롭게 알게된 내용, 궁금한 내용을 기록한다.
 * 각 요구사항을 구현하는 것이 중요한 것이 아니라 구현 과정을 통해 학습한 내용을 인식하는 것이 배움에 중요하다. 
 
-### 요구사항 1 - http://localhost:8080/index.html로 접속시 응답
-* 
+## ch 3, 4 공부 내용
 
-### 요구사항 2 - get 방식으로 회원가입
-* 
+### 우리의 서버 기본 동작
+1. WebServer.main : 사용자의 요청이 올 때까지 while 문을 돌며, listen() 하고 있는다.
+2. 사용자의 요청이 오면, RequestHandler(Thread) 를 start() 한다.
+
+### Thread 의 run() 과 start()
+🤔 처리로직은 run()에 있는데, 왜 run() 이 아니라 start() 호출하나요?
+- Thread 의 동작 방식을 알아야 한다!
+
+#### `start()` 와 `run()` 의 차이와 쓰레드가 실행되는 과정
+- `run()` : 생성된 쓰레드를 실행하는 것이 아니라, 단순히 클래스에 선언된 메서드를 호출
+- `start()` : 새로운 쓰레드 작업에 필요한 호출 스택(call stack)을 생성하고 다음에 run 호출하여, 생성된 호출 스택에 run() 이 첫 번째로 올라오도록 함
+
+즉, run() 은 그냥 메서드 호출이고, start() 는 호출 스택도 생성하고 그 다음 run() 까지 실행하여 run() 은 새로 생성된 호출 스택에 적재되는 것!
+
+[그림 예시]
+
+![img.png](img.png)
+
+### Thread VS Runnable
+
+
+
+### static 사용하는 이유
 
 ### 요구사항 3 - post 방식으로 회원가입
 
@@ -31,14 +40,29 @@
   
   IOUtils 에 있던 readData 를 사용하니 해결됨. 여기서는 헤더에 있는 contentLength 정보를 이용해서 읽어옴
 
-### 요구사항 4 - redirect 방식으로 이동
-* 
+## ch 5 공부 내용
 
-### 요구사항 5 - cookie
-* 
+### 리팩터링 - HttpServletRequest 분석
+- 리팩터링할 때 스프링에서는 HttpRequest 를 어떻게 처리하는지 궁금해서 찾아보았다.
+#### (번외) Tomcat vs Jetty 등 WAS 내용 정리
+- HttpServletRequest 분석하면서 어디까지가 tomcat 에서 처리하는 것이고, 어디서 Spring MVC 로 넘어오는지 궁금하여 알아보았다.
+#### (번외) ParameterMap VS ConcurrentHashMap VS HashMap
+- HttpServletRequest 분석하면서 Map 이 다양한 구현체를 가진다는 것을 알고, 알아보았다.
 
-### 요구사항 6 - stylesheet 적용
-* 
+### 리팩터링 - Spring MVC 구조
+- 리팩터링할 때 스프링의 FrontController 개념을 배웠던 기억이 나서 정리해보았다.
+### 리팩터링 - 401 코드에서 302 코드로
 
-### heroku 서버에 배포 후
-* 
+|상태 코드| 	의미	              | 클라이언트 동작                                   |
+|:---|:------------------|:-------------------------------------------|
+|401 Unauthorized| 인증이 필요함 (로그인 안 됨) | 클라이언트가 직접 로그인 페이지로 이동하거나 로그인 요청을 다시 시도해야 함 |
+|302 Found      | 서버가 로그인 페이지로 리다이렉트| 브라우저가 자동으로 로그인 페이지로 이동함|           
+
+- 로그인 실패와 접근 권한이 없을 때는 401이라고 생각함
+- 401은 클라이언트가 잘못된 인증 정보를 보냈다는 의미로 자동으로 리다이렉트 하지 않고, 클라이언트가 다시 로그인 요청을 보내도록 유도하는 상태 코드(의미 전달 용도)
+- 302는 서버에서 잘못된 인증 정보를 보냈다고 바로 로그인 화면으로 보내는 상태 코드(서버가 직접 재로그인 실행)
+
+즉, 서버와 프론트가 통신하지 않고, 함께 있는 현 상태에서는 302를 쓰는 것이 더 적합하다고 생각함
+
+### 리팩터링 - Response 객체와 viewResolver
+
