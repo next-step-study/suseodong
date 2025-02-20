@@ -36,11 +36,18 @@ public class HttpRequest implements Request {
         return header.getHeaderValue(key);
     }
 
+    /**
+     * FIXME : PUT, DELETE, PATCH
+     */
     public String getParameters(String key) {
-        if (requestLine.getMethod().equals(HttpMethod.POST)) { // POST
+        if (requestLine.getMethod().equals(HttpMethod.POST) || requestLine.getMethod().equals(HttpMethod.PUT) || requestLine.getMethod().equals(HttpMethod.PATCH)) { // POST
             return HttpParserUtils.parseQueryString(body).get(key);
-        } else { // GET
+        }
+        else if (requestLine.getMethod().equals(HttpMethod.GET)){ // GET
             return HttpParserUtils.parseQueryString(requestLine.getQuery()).get(key);
+        }
+        else { // DELETE
+            return getPathVariable(requestLine.getUri());
         }
     }
 
@@ -63,8 +70,14 @@ public class HttpRequest implements Request {
         HttpMethod httpMethod;
         if ("POST".equals(line.split(" ")[0])) {
             httpMethod = HttpMethod.POST;
-        } else {
+        } else if ("GET".equals(line.split(" ")[0])){
             httpMethod = HttpMethod.GET;
+        } else if ("PUT".equals(line.split(" ")[0])) {
+            httpMethod = HttpMethod.PUT;
+        } else if ("DELETE".equals(line.split(" ")[0])) {
+            httpMethod = HttpMethod.DELETE;
+        } else {
+            httpMethod = HttpMethod.PATCH;
         }
 
         if (line.split(" ")[1].split("\\?").length == 2) {
@@ -95,10 +108,15 @@ public class HttpRequest implements Request {
     }
 
     private String getBody(BufferedReader br, HttpMethod httpMethod, String contentLength) throws IOException {
-        boolean isPost = httpMethod.equals(HttpMethod.POST);
-        if (isPost) {
+        boolean existBody = httpMethod.equals(HttpMethod.POST) || httpMethod.equals(HttpMethod.PATCH) || httpMethod.equals(HttpMethod.PUT);
+        if (existBody) {
             return URLDecoder.decode(IOUtils.readData(br, Integer.parseInt(contentLength)), "UTF-8");
         }
         return null;
+    }
+
+    private String getPathVariable(String path) {
+        String[] value = path.split("/");
+        return value[value.length-1];
     }
 }

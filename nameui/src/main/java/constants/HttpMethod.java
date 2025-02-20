@@ -5,7 +5,10 @@ import lombok.Getter;
 @Getter
 public enum HttpMethod {
     GET("GET"),
-    POST("POST");
+    POST("POST"),
+    PUT("PUT"),
+    DELETE("DELETE"),
+    PATCH("PATCH");
 
     private final String method;
 
