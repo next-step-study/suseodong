@@ -6,7 +6,6 @@ import controller.Controller;
 import db.DataBase;
 import http.request.Request;
 import http.response.Response;
-import http.response.ResponseData;
 import model.User;
 
 import java.io.File;
@@ -29,9 +28,11 @@ public class UserSaveController implements Controller {
 
         byte[] body = Files.readAllBytes(new File(BASE_URL + "/index.html").toPath());
 
-        ResponseData responseData = ResponseData.builder().httpStatus(HttpStatus.HTTP_STATUS_302)
-                .contentType("html").body(body)
-                .location("/index.html").build();
-        response.forward(responseData);
+        response.setStatus(HttpStatus.HTTP_STATUS_302);
+        response.addHeader("Content-Type", "html");
+        response.addHeader("Location", "/index.html");
+        response.setBody(body);
+
+        response.forward();
     }
 }

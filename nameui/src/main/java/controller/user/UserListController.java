@@ -6,7 +6,6 @@ import controller.Controller;
 import db.DataBase;
 import http.request.Request;
 import http.response.Response;
-import http.response.ResponseData;
 import util.GenerateHtmlUtils;
 
 import java.io.File;
@@ -38,17 +37,20 @@ public class UserListController implements Controller {
 
             // 응답 생성
             byte[] result = resultStr.getBytes(StandardCharsets.UTF_8);
-
-            ResponseData responseData = ResponseData.builder().httpStatus(HttpStatus.HTTP_STATUS_200).contentType("html").body(result).build();
-            response.forward(responseData);
+            response.setStatus(HttpStatus.HTTP_STATUS_200);
+            response.addHeader("Content-Type", "html");
+            response.setBody(result);
+            response.forward();
         }
         else { // 로그아웃 상태
             byte[] body = Files.readAllBytes(new File(BASE_URL + "/user/login.html").toPath());
 
-            ResponseData responseData = ResponseData.builder().httpStatus(HttpStatus.HTTP_STATUS_302)
-                    .contentType("html").body(body).cookie("logined=false")
-                    .location("/user/login.html").build();
-            response.forward(responseData);
+            response.setStatus(HttpStatus.HTTP_STATUS_302);
+            response.addHeader("Content-Type", "html");
+            response.addCookie("logined", "false");
+            response.addHeader("Location", "/user/login.html");
+            response.setBody(body);
+            response.forward();
         }
     }
 }

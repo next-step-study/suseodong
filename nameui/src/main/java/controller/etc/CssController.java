@@ -5,7 +5,6 @@ import constants.HttpStatus;
 import controller.Controller;
 import http.request.Request;
 import http.response.Response;
-import http.response.ResponseData;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +24,10 @@ public class CssController implements Controller {
         String url = request.getRequestURI();
         byte[] css = Files.readAllBytes(new File(BASE_URL + url).toPath());
 
-        ResponseData responseData = ResponseData.builder().httpStatus(HttpStatus.HTTP_STATUS_200).contentType("css").body(css).build();
-        response.forward(responseData);
+        response.setStatus(HttpStatus.HTTP_STATUS_200);
+        response.addHeader("Content-Type", "css");
+        response.setBody(css);
+
+        response.forward();
     }
 }

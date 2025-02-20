@@ -4,9 +4,7 @@ import constants.HttpMethod;
 import constants.HttpStatus;
 import controller.Controller;
 import http.request.Request;
-import http.response.HttpResponse;
 import http.response.Response;
-import http.response.ResponseData;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +26,9 @@ public class HtmlController implements Controller {
         // 요청 URL 에 해당하는 파일을 읽어서 전달
         byte[] body = Files.readAllBytes(new File(BASE_URL + url).toPath());
 
-        ResponseData responseData = ResponseData.builder().httpStatus(HttpStatus.HTTP_STATUS_200).contentType("html").body(body).build();
-        response.forward(responseData);
+        response.setStatus(HttpStatus.HTTP_STATUS_200);
+        response.addHeader("Content-Type", "html");
+        response.setBody(body);
+        response.forward();
     }
 }
