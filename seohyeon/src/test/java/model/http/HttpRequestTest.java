@@ -1,13 +1,15 @@
+package model.http;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static util.http.HttpMethod.GET;
-import static util.http.HttpMethod.POST;
+import static model.http.HttpMethod.GET;
+import static model.http.HttpMethod.POST;
 
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import org.junit.Test;
-import util.http.HttpRequest;
+import model.http.HttpRequest;
 
 public class HttpRequestTest {
 

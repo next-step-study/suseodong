@@ -4,7 +4,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
-import util.http.Header;
+import model.http.Header;
 
 public class HttpRequestUrlUtilsTest {
 

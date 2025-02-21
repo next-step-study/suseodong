@@ -3,7 +3,7 @@ package util;
 import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.Map;
-import util.http.Header;
+import model.http.Header;
 
 public class HttpRequestUrlUtils {
 

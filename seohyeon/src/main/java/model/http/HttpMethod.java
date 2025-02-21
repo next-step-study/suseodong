@@ -1,4 +1,4 @@
-package util.http;
+package model.http;
 
 public enum HttpMethod {
 

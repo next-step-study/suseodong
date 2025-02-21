@@ -18,8 +18,8 @@ import java.util.Map;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.http.HttpRequest;
-import util.http.HttpResponse;
+import model.http.HttpRequest;
+import model.http.HttpResponse;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);

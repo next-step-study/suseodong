@@ -1,4 +1,4 @@
-package util.http;
+package model.http;
 
 import static util.HttpRequestUrlUtils.parseRequestHeader;
 import static util.IOUtils.readData;

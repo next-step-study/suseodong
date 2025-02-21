@@ -1,11 +1,11 @@
-package http;
+package model.http;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import org.junit.Test;
-import util.http.HttpResponse;
+import model.http.HttpResponse;
 
 public class HttpResponseTest {
 

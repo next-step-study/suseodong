@@ -1,4 +1,4 @@
-package util.http;
+package model.http;
 
 import java.util.Collections;
 import java.util.Map;
