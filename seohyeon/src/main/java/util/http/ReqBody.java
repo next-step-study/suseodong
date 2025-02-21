@@ -2,13 +2,15 @@ package util.http;
 
 import java.util.Collections;
 import java.util.Map;
+import util.HttpRequestUtils;
 
 public class ReqBody {
 
     private Map<String, String> body;
 
-    public ReqBody(Map<String, String> body) {
-        this.body = Collections.unmodifiableMap(body);
+    public ReqBody(String queryString) {
+        Map<String, String> parsedQueryString = HttpRequestUtils.parseQueryString(queryString);
+        this.body = Collections.unmodifiableMap(parsedQueryString);
     }
 
     public String getValue(String key) {

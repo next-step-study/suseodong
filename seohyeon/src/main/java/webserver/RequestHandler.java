@@ -79,7 +79,7 @@ public class RequestHandler extends Thread {
                     if (reqUrl.startsWith("/user/create")) {
                         if (reqMethod.equals(GET)) {
                             String queryParams = URLDecoder.decode(reqUrl.substring(reqUrl.indexOf("?") + 1), "UTF-8");
-                            ReqBody reqParams = new ReqBody(parseQueryString(queryParams));
+                            ReqBody reqParams = new ReqBody(queryParams);
                             signUp(reqParams);
                         } else if (reqMethod.equals(POST)) {
                             signUp(reqBody);
@@ -126,9 +126,9 @@ public class RequestHandler extends Thread {
         if (parsedHeader.exists("Content-Length")) {
             String reqBody = readData(br, Integer.parseInt(parsedHeader.getValue("Content-Length")));
             reqBody = URLDecoder.decode(reqBody, "UTF-8");
-            return new ReqBody(parseQueryString(reqBody));
+            return new ReqBody(reqBody);
         }
-        return new ReqBody(new HashMap<>());
+        return new ReqBody("");
     }
 
     private void setSignInStatus(ReqHeader parsedHeader) {
