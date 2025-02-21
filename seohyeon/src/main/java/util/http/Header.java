@@ -1,6 +1,5 @@
 package util.http;
 
-import java.util.Collections;
 import java.util.Map;
 
 public class Header {
@@ -8,7 +7,7 @@ public class Header {
     private Map<String, String> header;
 
     public Header(Map<String, String> header) {
-        this.header = Collections.unmodifiableMap(header);
+        this.header = header;
     }
 
     public boolean exists(String key) {
@@ -22,7 +21,13 @@ public class Header {
         return "";
     }
 
+    public Map<String, String> get() { return this.header; }
+
     public int getSize() {
         return this.header.size();
+    }
+
+    public void addHeader(String key, String value) {
+        header.put(key, value);
     }
 }
