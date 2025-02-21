@@ -15,7 +15,7 @@ public class HttpRequestUrlUtils {
         return "";
     }
 
-    public static String parseRequestUrl(String line) {
+    public static String parseRequestLine(String line) {
         if (!Strings.isNullOrEmpty(line)) {
             String[] firstLine = line.split(" ");
             if (!firstLine[1].isEmpty()) return firstLine[1];

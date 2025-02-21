@@ -27,17 +27,17 @@ public class HttpRequestUrlUtilsTest {
     }
 
     @Test
-    public void parseRequestUrl() {
-        String requestUrl = HttpRequestUrlUtils.parseRequestUrl(firstLine);
+    public void parseRequestLine() {
+        String requestUrl = HttpRequestUrlUtils.parseRequestLine(firstLine);
         assertThat(requestUrl, is("/index.html"));
     }
 
     @Test
-    public void parseRequestUrl_null() {
-        String requestUrl = HttpRequestUrlUtils.parseRequestUrl(null);
+    public void parseRequestLine_null() {
+        String requestUrl = HttpRequestUrlUtils.parseRequestLine(null);
         assertThat(requestUrl.isEmpty(), is(true));
 
-        requestUrl = HttpRequestUrlUtils.parseRequestUrl("");
+        requestUrl = HttpRequestUrlUtils.parseRequestLine("");
         assertThat(requestUrl.isEmpty(), is(true));
     }
 
