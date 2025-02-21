@@ -19,6 +19,7 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.http.HttpRequest;
+import util.http.HttpResponse;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -42,6 +43,7 @@ public class RequestHandler extends Thread {
             log.info("----HTTP Request end----");
 
             DataOutputStream dos = new DataOutputStream(out);
+            HttpResponse httpResponse = new HttpResponse(dos);
             byte[] resBody;
             if (reqUrl.equals("/")) {
                 resBody = "Hello World".getBytes();
@@ -52,28 +54,30 @@ public class RequestHandler extends Thread {
                             String userListRes = createUserList();
                             resBody = userListRes.getBytes();
                         } else {
-                            response302Header(dos, "/user/login.html");
+                            httpResponse.sendRedirect("/user/login.html");
                             return;
                         }
                     } else {
                         resBody = Files.readAllBytes(new File("./webapp" + reqUrl).toPath());
                         if (reqUrl.endsWith(".css")) {
-                            response200HeaderForCss(dos, resBody.length);
+                            httpResponse.forward("./webapp" + reqUrl);
                         }
                     }
                 } else {
                     if (reqUrl.startsWith("/user/create")) {
                         signUp(request);
                         log.info("SignUp with " + request.getMethod());
-                        response302Header(dos, "/index.html");
+                        httpResponse.sendRedirect("/index.html");
                         return;
                     } else if (reqUrl.startsWith("/user/login")) {
                         boolean isSuccess = signIn(request);
                         if (isSuccess) {
-                            response302HeaderWithCookie(dos, "/index.html", "logined=true");
+                            httpResponse.addHeader("Set-Cookie", "logined=true");
+                            httpResponse.sendRedirect("/index.html");
                             return;
                         }
-                        response302HeaderWithCookie(dos, "/user/login_failed.html", "logined=false");
+                        httpResponse.addHeader("Set-Cookie", "logined=false");
+                        httpResponse.sendRedirect("/user/login_failed.html");
                         return;
                     } else {
                         resBody = "Invalid RequestUrl".getBytes();
@@ -81,8 +85,8 @@ public class RequestHandler extends Thread {
                 }
             }
 
-            response200Header(dos, resBody.length);
-            responseBody(dos, resBody);
+            httpResponse.response200Header("text/html;charset=utf-8", resBody.length);
+            httpResponse.responseBody(resBody);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
@@ -133,55 +137,4 @@ public class RequestHandler extends Thread {
         return userList.toString();
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void response200HeaderForCss(DataOutputStream dos, int lengthOfBodyContent) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: " + "text/css\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void response302Header(DataOutputStream dos, String redirectUrl) {
-        try {
-            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
-            dos.writeBytes("Location: " + redirectUrl + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void response302HeaderWithCookie(DataOutputStream dos, String redirectUrl, String cookie) {
-        try {
-            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
-            dos.writeBytes("Location: " + redirectUrl + "\r\n");
-            dos.writeBytes("Set-Cookie: " + cookie + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void responseBody(DataOutputStream dos, byte[] body) {
-        try {
-            dos.write(body, 0, body.length);
-            dos.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
 }
