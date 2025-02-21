@@ -1,33 +1,24 @@
 package webserver;
 
-import static util.HttpRequestUrlUtils.*;
 import static util.HttpRequestUtils.*;
-import static util.IOUtils.*;
-import static util.http.HttpMethod.*;
 
-import com.google.common.base.Strings;
 import db.DataBase;
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.http.HttpMethod;
-import util.http.ReqBody;
-import util.http.ReqHeader;
+import util.http.HttpRequest;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -44,15 +35,10 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String line = br.readLine();
-            HttpMethod reqMethod = HttpMethod.valueOf(parseRequestMethod(line));
-            String reqUrl = parseRequestUrl(line);
-
             log.info("----HTTP Request start----");
-            ReqHeader reqHeader = readReqHeader(br);
-            ReqBody reqBody = readReqBody(reqHeader, br);
-            setSignInStatus(reqHeader);
+            HttpRequest request = new HttpRequest(in);
+            String reqUrl = request.getPath();
+            setSignInStatus(request);
             log.info("----HTTP Request end----");
 
             DataOutputStream dos = new DataOutputStream(out);
@@ -77,19 +63,12 @@ public class RequestHandler extends Thread {
                     }
                 } else {
                     if (reqUrl.startsWith("/user/create")) {
-                        if (reqMethod.equals(GET)) {
-                            String queryParams = URLDecoder.decode(reqUrl.substring(reqUrl.indexOf("?") + 1), "UTF-8");
-                            ReqBody reqParams = new ReqBody(queryParams);
-                            signUp(reqParams);
-                        } else if (reqMethod.equals(POST)) {
-                            signUp(reqBody);
-                        }
-
-                        log.info("SignUp with " + reqMethod);
+                        signUp(request);
+                        log.info("SignUp with " + request.getMethod());
                         response302Header(dos, "/index.html");
                         return;
                     } else if (reqUrl.startsWith("/user/login")) {
-                        boolean isSuccess = signIn(reqBody);
+                        boolean isSuccess = signIn(request);
                         if (isSuccess) {
                             response302HeaderWithCookie(dos, "/index.html", "logined=true");
                             return;
@@ -109,49 +88,27 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private ReqHeader readReqHeader(BufferedReader br) throws IOException {
-        String line = br.readLine();
-        String rawHeader = "";
-
-        while (!Strings.isNullOrEmpty(line)) {
-            rawHeader += line + "\n";
-            line = br.readLine();
-        }
-        log.info(rawHeader);
-
-        return parseRequestHeader(rawHeader);
-    }
-
-    private static ReqBody readReqBody(ReqHeader parsedHeader, BufferedReader br) throws IOException {
-        if (parsedHeader.exists("Content-Length")) {
-            String reqBody = readData(br, Integer.parseInt(parsedHeader.getValue("Content-Length")));
-            reqBody = URLDecoder.decode(reqBody, "UTF-8");
-            return new ReqBody(reqBody);
-        }
-        return new ReqBody("");
-    }
-
-    private void setSignInStatus(ReqHeader parsedHeader) {
-        if (parsedHeader.exists("Cookie")) {
-            Map<String, String> cookies = parseCookies(parsedHeader.getValue("Cookie"));
+    private void setSignInStatus(HttpRequest request) {
+        if (!request.getHeader("Cookie").isEmpty()) {
+            Map<String, String> cookies = parseCookies(request.getHeader("Cookie"));
             if (Boolean.parseBoolean(cookies.get("logined"))) isLogined = true;
         }
     }
 
-    private void signUp(ReqBody parsedUserInfo) {
-        String userId = parsedUserInfo.getValue("userId");
-        String password = parsedUserInfo.getValue("password");
-        String name = parsedUserInfo.getValue("name");
-        String email = parsedUserInfo.getValue("email");
+    private void signUp(HttpRequest request) throws UnsupportedEncodingException {
+        String userId = request.getParameter("userId");
+        String password = request.getParameter("password");
+        String name = request.getParameter("name");
+        String email = request.getParameter("email");
 
         User user = new User(userId, password, name, email);
         log.info(user.toString());
         DataBase.addUser(user);
     }
 
-    private boolean signIn(ReqBody parsedUserInfo) {
-        String userId = parsedUserInfo.getValue("userId");
-        String password = parsedUserInfo.getValue("password");
+    private boolean signIn(HttpRequest request) throws UnsupportedEncodingException {
+        String userId = request.getParameter("userId");
+        String password = request.getParameter("password");
 
         User userInDb = DataBase.findUserById(userId);
         return userInDb != null && userInDb.getPassword().equals(password);
