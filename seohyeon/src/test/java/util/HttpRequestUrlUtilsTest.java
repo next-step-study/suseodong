@@ -4,7 +4,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
-import util.http.ReqHeader;
+import util.http.Header;
 
 public class HttpRequestUrlUtilsTest {
 
@@ -43,7 +43,7 @@ public class HttpRequestUrlUtilsTest {
 
     @Test
     public void parseRequestHeader() {
-        ReqHeader parsedHeader = HttpRequestUrlUtils.parseRequestHeader(headerWithoutFirstLine);
+        Header parsedHeader = HttpRequestUrlUtils.parseRequestHeader(headerWithoutFirstLine);
         assertThat(parsedHeader.getSize(), is(3));
         assertThat(parsedHeader.getValue("Host"), is("localhost:8080"));
         assertThat(parsedHeader.getValue("Connection"), is("keep-alive"));
@@ -52,7 +52,7 @@ public class HttpRequestUrlUtilsTest {
 
     @Test
     public void parseRequestHeader_null() {
-        ReqHeader parsedHeader = HttpRequestUrlUtils.parseRequestHeader(null);
+        Header parsedHeader = HttpRequestUrlUtils.parseRequestHeader(null);
         assertThat(parsedHeader.getSize(), is(0));
 
         parsedHeader = HttpRequestUrlUtils.parseRequestHeader("");
@@ -61,7 +61,7 @@ public class HttpRequestUrlUtilsTest {
 
     @Test
     public void parseRequestHeader_invalid() {
-        ReqHeader parsedHeader = HttpRequestUrlUtils.parseRequestHeader("Host: localhost:8080 Connection: keep-alive");
+        Header parsedHeader = HttpRequestUrlUtils.parseRequestHeader("Host: localhost:8080 Connection: keep-alive");
         assertThat(parsedHeader.getSize(), is(0));
 
         parsedHeader = HttpRequestUrlUtils.parseRequestHeader("Host:localhost:8080\nConnection:keep-alive");

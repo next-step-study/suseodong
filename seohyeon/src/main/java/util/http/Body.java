@@ -4,11 +4,11 @@ import java.util.Collections;
 import java.util.Map;
 import util.HttpRequestUtils;
 
-public class ReqBody {
+public class Body {
 
     private Map<String, String> body;
 
-    public ReqBody(String queryString) {
+    public Body(String queryString) {
         Map<String, String> parsedQueryString = HttpRequestUtils.parseQueryString(queryString);
         this.body = Collections.unmodifiableMap(parsedQueryString);
     }

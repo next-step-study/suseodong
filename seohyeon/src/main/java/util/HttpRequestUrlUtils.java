@@ -3,7 +3,7 @@ package util;
 import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.Map;
-import util.http.ReqHeader;
+import util.http.Header;
 
 public class HttpRequestUrlUtils {
 
@@ -28,11 +28,11 @@ public class HttpRequestUrlUtils {
      *            Request Header에서 첫 번째 줄 이후로 전달되는 field1: value\nfield2: value2 형식임
      * @return
      */
-    public static ReqHeader parseRequestHeader(String header) {
+    public static Header parseRequestHeader(String header) {
         if (validateLine(header, "\n")) {
-            return new ReqHeader(new HashMap<>());
+            return new Header(new HashMap<>());
         }
-        return new ReqHeader(parseLines(header));
+        return new Header(parseLines(header));
     }
 
     private static Map<String, String> parseLines(String header) {

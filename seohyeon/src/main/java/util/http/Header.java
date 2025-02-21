@@ -3,11 +3,11 @@ package util.http;
 import java.util.Collections;
 import java.util.Map;
 
-public class ReqHeader {
+public class Header {
 
     private Map<String, String> header;
 
-    public ReqHeader(Map<String, String> header) {
+    public Header(Map<String, String> header) {
         this.header = Collections.unmodifiableMap(header);
     }
 

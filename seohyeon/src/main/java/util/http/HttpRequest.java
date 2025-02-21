@@ -19,9 +19,9 @@ public class HttpRequest {
 
     private String path;
 
-    private ReqHeader header;
+    private Header header;
 
-    private ReqBody body;
+    private Body body;
 
     public HttpRequest(InputStream in) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
@@ -54,7 +54,7 @@ public class HttpRequest {
         method = HttpMethod.valueOf(tokens[0]);
         if (tokens[1].contains("?")) {
             path = URLDecoder.decode(tokens[1].substring(0, tokens[1].indexOf("?")), "UTF-8");
-            body = new ReqBody(URLDecoder.decode(tokens[1].substring(tokens[1].indexOf("?") + 1), "UTF-8"));
+            body = new Body(URLDecoder.decode(tokens[1].substring(tokens[1].indexOf("?") + 1), "UTF-8"));
         } else {
             path = tokens[1];
         }
@@ -78,7 +78,7 @@ public class HttpRequest {
     private void setBody(BufferedReader br) throws IOException {
         if (header.exists("Content-Length")) {
             String reqBody = readData(br, Integer.parseInt(header.getValue("Content-Length")));
-            body = new ReqBody(URLDecoder.decode(reqBody, "UTF-8"));
+            body = new Body(URLDecoder.decode(reqBody, "UTF-8"));
         }
     }
 }
