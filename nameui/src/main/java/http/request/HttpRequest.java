@@ -2,6 +2,7 @@ package http.request;
 
 import constants.HttpMethod;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import util.HttpParserUtils;
 import util.IOUtils;
 
@@ -16,6 +17,7 @@ import java.util.Map;
 
 import static util.HttpParserUtils.parseHeader;
 
+@Slf4j
 public class HttpRequest implements Request {
     private final Header header;
     private final RequestLine requestLine;
@@ -37,9 +39,6 @@ public class HttpRequest implements Request {
         return header.getHeaderValue(key);
     }
 
-    /**
-     * FIXME : PUT, DELETE, PATCH
-     */
     public String getParameters(String key) {
         if (requestLine.getMethod().equals(HttpMethod.POST) || requestLine.getMethod().equals(HttpMethod.PUT) || requestLine.getMethod().equals(HttpMethod.PATCH)) { // POST
             return HttpParserUtils.parseQueryString(body).get(key);
@@ -68,18 +67,27 @@ public class HttpRequest implements Request {
         }
 
         // http method
-        HttpMethod httpMethod;
-        if ("POST".equals(line.split(" ")[0])) {
-            httpMethod = HttpMethod.POST;
-        } else if ("GET".equals(line.split(" ")[0])){
-            httpMethod = HttpMethod.GET;
-        } else if ("PUT".equals(line.split(" ")[0])) {
-            httpMethod = HttpMethod.PUT;
-        } else if ("DELETE".equals(line.split(" ")[0])) {
-            httpMethod = HttpMethod.DELETE;
-        } else {
-            httpMethod = HttpMethod.PATCH;
-        }
+//        HttpMethod httpMethod;
+        HttpMethod httpMethod = HttpMethod.valueOf(line.split(" ")[0]);
+        log.debug("httpMethod : {}", httpMethod.name());
+
+//        switch (line.split(" ")[0]) {
+//            case "GET":
+//                httpMethod = HttpMethod.GET;
+//                break;
+//            case "POST":
+//                httpMethod = HttpMethod.POST;
+//                break;
+//            case "DELETE":
+//                httpMethod = HttpMethod.DELETE;
+//                break;
+//            case "PUT":
+//                httpMethod = HttpMethod.PUT;
+//                break;
+//            default: // PATCH
+//                httpMethod = HttpMethod.PATCH;
+//                break;
+//        }
 
         if (line.split(" ")[1].split("\\?").length == 2) {
             return new RequestLine(httpMethod, line.split(" ")[1].split("\\?")[0], URLDecoder.decode(line.split(" ")[1].split("\\?")[1], "UTF-8"));

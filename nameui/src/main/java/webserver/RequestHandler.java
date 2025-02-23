@@ -30,7 +30,7 @@ public class RequestHandler extends Thread {
             Request request = new HttpRequest(in);
             Response response = new HttpResponse(new DataOutputStream(out));
 
-            log.debug("request : {}, {}", request.getRequestMethod().getMethod(), request.getRequestURI());
+            log.debug("request : {}, {}", request.getRequestMethod().name(), request.getRequestURI());
 
             // FrontController 에게 요청 전달
             FrontController frontController = new FrontController();
