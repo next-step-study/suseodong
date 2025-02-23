@@ -3,6 +3,7 @@
 * 구현을 완료한 후 구현 과정에서 새롭게 알게된 내용, 궁금한 내용을 기록한다.
 * 각 요구사항을 구현하는 것이 중요한 것이 아니라 구현 과정을 통해 학습한 내용을 인식하는 것이 배움에 중요하다. 
 
+---
 ## ch 3, 4 공부 내용
 
 ### 우리의 서버 기본 동작
@@ -167,6 +168,8 @@ public class Main {
   
   IOUtils 에 있던 readData 를 사용하니 해결됨. 여기서는 헤더에 있는 contentLength 정보를 이용해서 읽어옴
 
+---
+
 ## ch 5 공부 내용
 
 ### 리팩터링 - HttpServletRequest 분석
@@ -207,10 +210,83 @@ public class Main {
 
 > 즉, Tomcat 에서 HTTP 요청을 파싱하고, 그 결과로 HttpServletRequest 를 생성하고 결과를 담은 HttpServletResponse 객체를 생성하여 SpringMVC 에 전달하는 것 
 
-#### (번외) Tomcat vs Jetty 등 WAS 내용 정리
+### (번외) Tomcat vs Jetty 등 WAS 내용 정리
 - HttpServletRequest 분석하면서 어디까지가 tomcat 에서 처리하는 것이고, 어디서 Spring MVC 로 넘어오는지 궁금하여 알아보았다.
 
-#### (번외) ParameterMap VS ConcurrentHashMap VS HashMap
+#### WAS?
+- WAS 는 Web Application Server 환경을 만들어서 동작시키는 기능을 하는 소프트웨어 프레임워크
+- 인터넷상에서 HTTP 를 통해 사용자 컴퓨터나 장치에 애플리케이션을 수행해주는 미들웨어(소프트웨어 엔진)
+- 동적 서버 콘텐츠를 수행하며, 주로 DB 서버와 같이 수행
+- Java Web Application 을 실행하기 위해 서버에 필요한 기능들을 제공하는 것이 WAS
+
+#### WAS 가 하는 일
+1. Servlet 과 JSP 실행
+2. 세션 관리
+   - 세션 생성, 세션 데이터 저장, 세션 무효화 등의 기능 제공
+3. 보안
+4. DB 연결 관리
+5. Clustering 과 Load balancing
+6. 에러와 예외 처리
+7. 로깅과 모니터링
+
+#### Tomcat VS Jetty
+|        | Tomcat                                           | Jetty                                       |
+|:-------|:-------------------------------------------------|:--------------------------------------------|
+| 설명     | Apache 재단이 개발<br/>가장 널리 사용되는 서블릿 컨테이너            | 이클리스 재단이 개발<br/>가벼운 서블릿 컨테이너                |
+| 특징     | 대형 애플리케이션에 적합, JSP 및 다양한 기능 지원                   | 가볍고 빠른 실행 속도, 내장형으로 사용하기 용이                 |
+| 성능     | 다소 무거우며 메모리 사용량이 큼                               | 경량이므로 메모리 사용량이 적음                           |
+| 내장형 사용 | 주로 독립 실행 서버로 많이 사용됨<br/>(Tomcat 도 스프링 부트에서 내장형으로 사용됨) | 주로 스프링 부트 등에서 내장형으로 많이 사용됨                  |
+| 운영 방식  | 서블릿 컨테이너 + HTTP 서버 기능 제공                         | 주로 서블릿 컨테이너로 사용                             |
+| 사용 사례  | 전통적인 대규모 웹 애플리케이션                                | 내장형 WAS가 필요한 환경(Spring Boot, Microservices) |
+- 정리하면, Tomcat 은 기능이 많고 안정적인 반면, Jetty 는 가볍고 빠름
+- Tomcat 은 JSP 와 같은 기능이 필요할 때 적합하고, Jetty 는 내장 서버로 활용할 때 좋음
+
+#### 우리가 주로 쓰는 Tomcat 을 알아보자!
+
+Tomcat 의 역할
+- Tomcat 은 Java Servlet 과 JSP(JavaServer Pages)를 실행하는 서블릿 컨테이너(WAS, Web Application Server)
+- 웹 브라우저에서 HTTP 요청이 오면, 이를 파싱하고 서블릿을 실행한 후 응답을 반환하는 역할
+
+Tomcat 의 핵심 컴포넌트
+- Tomcat 은 여러 개의 컴포넌트로 이루어져 있음
+
+| 컴포넌트     | 설명                            |
+|:---------|:------------------------------|
+| Catalina | 서블릿 컨테이너(실제 요청을 처리)           |
+| Coyote   | HTTP 커넥터(HTTP 요청을 읽고, 응답을 반환) |
+| Jasper   | JSP 엔진(JSP를 서블릿으로 변환)         |
+| Cluster  | 여러 Tomcat 인스턴스를 클러스터링하여 부하 분산 |
+| Valves   | 요청을 처리하기 전에 수행할 작업 (필터와 비슷함)  |
+
+Tomcat 의 요청 처리 과정
+1. 요청 수신(Connector)
+   - 관련 클래스 : `org.apache.catalina.connertor.Connector`
+   - 1️⃣ 클라이언트가 HTTP 요청을 보내면 Tomcat 의 `Connector`가 요청을 수신
+   - 2️⃣ Connector 는 ServerSocket 을 통해 TCP 연결 수락, Endpoint 에 요청 전달
+2. 소켓 처리(Endpoin & Processor)
+   - 관련 클래스 : `org.apache.tomcat.util.net.AbstractEndpoint`, `org.apache.tomcat.util.net.NioEndpoint`, `org.apache.coyote.http11.Http11Processor`
+   - 1️⃣ `AbstractEndpoint`가 네트워크 소켓을 관리하고 요청을 처리할 `Processor`을 선택
+   - 2️⃣ `Http11Processor` 가 HTTP 요청을 파싱하고 내부적으로 HttpServletRequest 객체를 생성
+3. 요청 처리(Coyote & Request 객체 생성)
+   - 관련 클래스 : `org.apache.coyote.http11.Http11Processor`, `org.apache.catalina.connector.Request`, `org.apache.catalina.connector.Response`
+   - 1️⃣ `Http11Processor` 가 `HttpServletRequest`, `HttpServletResponse` 를 생성
+   - 2️⃣ HTTP 헤더, 바디 등을 읽어 Request 객체에 저장
+4. 서블릿 컨테이너 전달 (Engine & Host & Context & Wrapper)
+   - `org.apache.catalina.core.StandardEngine`, `org.apache.catalina.core.StandardHost`, `org.apache.catalina.core.StandardContext`, `org.apache.catalina.core.StandardWrapper`
+   - 1️⃣ 요청은 StandardEngine > StandardHost > StandardContext > StandardWrapper 순으로 전달
+   - 2️⃣ StandardWrapper 가 최종적으로 서블릿을 실행할 객체를 찾고 실행
+5. 서블릿 실행(Servlet & Filter)
+   - 관련 클래스 : `javax.servlet.http.HttpServlet`, `org.apache.catalina.core.ApplicationFilterChain`
+   - 1️⃣ 요청에 해당하는 서블릿 객체(HttpServlet)을 찾아서 service() 호출
+   - 2️⃣ ApplicationFilterChain 을 거쳐 필터(Filter) 를 실행한 후 서블릿 실행
+6. 응답 반환(Response 객체 & Connector)
+   - 관련 클래스 : `org.apache.catalina.connector.Response`, `org.apache.coyote.Response`
+   - 1️⃣ HttpServletResponse 에 데이터가 담기고, Response 객체를 통해 톰캣 내부로 전달
+   - 2️⃣ Http11Processor 가 Response 객체를 사용하여 응답을 생성
+   - 3️⃣ 응답을 네트워크 소켓을 통해 클라이언트에게 전송
+
+
+### (번외) ParameterMap VS ConcurrentHashMap VS HashMap
 - HttpServletRequest 분석하면서 Map 이 다양한 구현체를 가진다는 것을 알고, 알아보았다.
 
 ### 리팩터링 - Spring MVC 구조
