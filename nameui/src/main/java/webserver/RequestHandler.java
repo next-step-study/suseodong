@@ -34,7 +34,7 @@ public class RequestHandler extends Thread {
 
             // FrontController 에게 요청 전달
             FrontController frontController = new FrontController();
-            frontController.service(request, response);
+            frontController.dispatchRequest(request, response);
 
         }
         catch (RuntimeException | IOException e) {

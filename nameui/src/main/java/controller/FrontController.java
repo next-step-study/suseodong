@@ -40,7 +40,7 @@ public class FrontController {
         handlerAdapters.add(new ControllerHandlerAdapter());
     }
 
-    public void service(Request request, Response response) throws IOException {
+    public void dispatchRequest(Request request, Response response) throws IOException {
         Object handler = getHandler(request);
 
         if (handler == null) {
