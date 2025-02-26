@@ -74,9 +74,9 @@ public class HttpResponse implements Response {
             return;
         }
         Set<String> keySet = cookie.keySet();
-        String cookies = "Set-Cookie: ";
+        StringBuffer cookies = new StringBuffer("Set-Cookie: ");
         for (String key : keySet) {
-            cookies += key + "=" + cookie.get(key) + ";";
+            cookies.append(key + "=" + cookie.get(key) + ";");
         }
 
         dos.writeBytes(cookies + "\r\n");
