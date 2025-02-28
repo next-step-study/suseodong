@@ -23,9 +23,11 @@ public class HttpRequest {
 
     private Body body;
 
+    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+
     public HttpRequest(InputStream in) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        setFirstLine(br);
+        setFirstLine(br.readLine());
         String rawHeader = getHeaderLines(br);
         header = parseRequestHeader(rawHeader);
         setBody(br);
@@ -47,8 +49,8 @@ public class HttpRequest {
         return body.getValue(key);
     }
 
-    private void setFirstLine(BufferedReader br) throws IOException {
-        String firstLine = br.readLine();
+    private void setFirstLine(String firstLine) throws IOException {
+        log.info(firstLine);
         String[] tokens = firstLine.split(" ");
 
         method = HttpMethod.valueOf(tokens[0]);
@@ -61,8 +63,6 @@ public class HttpRequest {
     }
 
     private static String getHeaderLines(BufferedReader br) throws IOException {
-        Logger log = LoggerFactory.getLogger(RequestHandler.class);
-
         String line = br.readLine();
         String rawHeader = "";
 
