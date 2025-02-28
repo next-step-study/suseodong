@@ -69,4 +69,21 @@ public class ResponseHeader {
             log.error(e.getMessage());
         }
     }
+
+    public static String getContentType(String filename) {
+        if (filename.endsWith(".ico")) return "image/x-icon";
+        if (filename.endsWith(".png")) return "image/png";
+        if (filename.endsWith(".svg")) return "image/svg+xml";
+        return "application/octet-stream";
+    }
+
+    public static void responseFavicon(DataOutputStream dos, byte[] body, String contentType) throws IOException {
+        dos.writeBytes("HTTP/1.1 200 OK \r\n");
+        dos.writeBytes("Content-Type: " + contentType + "\r\n");
+        dos.writeBytes("Content-Length: " + body.length + "\r\n");
+        dos.writeBytes("Connection: keep-alive\r\n");
+        dos.writeBytes("\r\n");
+        dos.write(body, 0, body.length);
+        dos.flush();
+    }
 }
