@@ -9,8 +9,6 @@ public class DefaultController extends AbstractController {
     @Override
     void doGet(HttpRequest request, HttpResponse response) throws IOException {
         byte[] resBody = "Hello World".getBytes();
-
-        response.response200Header("text/html;charset=utf-8", resBody.length);
-        response.responseBody(resBody);
+        response.forwardBody(resBody);
     }
 }

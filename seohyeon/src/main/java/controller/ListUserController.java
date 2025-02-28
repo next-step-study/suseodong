@@ -17,9 +17,7 @@ public class ListUserController extends AbstractController {
         if (isLogin(request)) {
             String userListRes = createUserList();
             byte[] resBody = userListRes.getBytes();
-
-            response.response200Header("text/html;charset=utf-8", resBody.length);
-            response.responseBody(resBody);
+            response.forwardBody(resBody);
         } else {
             response.sendRedirect("/user/login.html");
         }

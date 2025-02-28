@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import org.junit.Test;
-import model.http.HttpResponse;
 
 public class HttpResponseTest {
 

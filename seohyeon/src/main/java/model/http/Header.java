@@ -1,6 +1,7 @@
 package model.http;
 
 import java.util.Map;
+import java.util.Set;
 
 public class Header {
 
@@ -23,11 +24,11 @@ public class Header {
 
     public Map<String, String> get() { return this.header; }
 
-    public int getSize() {
-        return this.header.size();
+    public Set<String> getKeySet() {
+        return this.header.keySet();
     }
 
-    public void addHeader(String key, String value) {
+    public void add(String key, String value) {
         header.put(key, value);
     }
 }
