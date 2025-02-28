@@ -1,12 +1,15 @@
 package webserver;
 
-import controller.Controllers;
+import controller.Controller;
+import controller.RequestMapping;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import model.http.HttpRequest;
@@ -34,9 +37,24 @@ public class RequestHandler extends Thread {
             DataOutputStream dos = new DataOutputStream(out);
             HttpResponse response = new HttpResponse(dos);
 
-            Controllers.run(request, response, reqUrl);
+            Controller controller = RequestMapping.getController(reqUrl);
+            if (controller == null) {
+                moveToDefaultPage(reqUrl, response);
+            } else {
+                controller.service(request, response);
+            }
         } catch (IOException e) {
             log.error(e.getMessage());
+        }
+    }
+
+    private static void moveToDefaultPage(String reqUrl, HttpResponse response) {
+        if (Files.exists(Paths.get("./webapp" + reqUrl))) {
+            String defaultPath = "./webapp" + reqUrl;
+            response.forward(defaultPath);
+        } else {
+            byte[] body = "page not exist".getBytes();
+            response.forwardBody(body);
         }
     }
 
