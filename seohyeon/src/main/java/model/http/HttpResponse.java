@@ -57,11 +57,9 @@ public class HttpResponse {
         File file = new File(filePath);
         byte[] resBody = Files.readAllBytes(file.toPath());
 
-        String contentType = Files.probeContentType(file.toPath());
-
-        if (contentType != null && contentType.equals("text/css")) {
+        if (filePath.endsWith(".css")) {
             response200Header("text/css", resBody.length);
-        } else {
+        } else if (filePath.endsWith(".html")) {
             response200Header("text/html;charset=utf-8", resBody.length);
         }
 
