@@ -1,6 +1,7 @@
 package model.http;
 
-import static util.HttpRequestUrlUtils.parseRequestHeader;
+import static model.http.HttpMethod.POST;
+import static util.HttpRequestUtils.parseHeader;
 import static util.IOUtils.readData;
 
 import com.google.common.base.Strings;
@@ -8,37 +9,73 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils.Pair;
 import webserver.RequestHandler;
 
 public class HttpRequest {
 
-    private HttpMethod method;
-
-    private String path;
+    private HttpRequestLine httpRequestLine;
 
     private Header header;
 
-    private Body body;
+    private Body param;
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
-    public HttpRequest(InputStream in) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        setFirstLine(br.readLine());
-        String rawHeader = getHeaderLines(br);
-        header = parseRequestHeader(rawHeader);
-        setBody(br);
+    public HttpRequest(InputStream in) {
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+
+            String firstLine = br.readLine();
+            httpRequestLine = new HttpRequestLine(firstLine);
+
+            header = getHeaderLines(br);
+
+            setParam(br);
+        } catch (IOException e) {
+            log.error("[HttpRequest] " + e.getMessage());
+        }
+    }
+
+    private static Header getHeaderLines(BufferedReader br) {
+        try {
+            String line = br.readLine();
+            Map<String, String> headerLine = new HashMap<>();
+
+            while (!Strings.isNullOrEmpty(line)) {
+                log.info(line);
+                Pair pair = parseHeader(line);
+                headerLine.put(pair.getKey(), pair.getValue());
+                line = br.readLine();
+            }
+
+            return new Header(headerLine);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("[HttpRequest] : " + e.getMessage());
+        }
+    }
+
+    private void setParam(BufferedReader br) {
+        try {
+            if (this.getMethod().equals(POST)) {
+                String reqBody = readData(br, Integer.parseInt(header.getValue("Content-Length")));
+                param = new Body(reqBody);
+            } else param = httpRequestLine.getParam();
+        } catch (IOException e) {
+            log.error("[HttpRequest] " + e.getMessage());
+        }
     }
 
     public HttpMethod getMethod() {
-        return this.method;
+        return this.httpRequestLine.getMethod();
     }
 
     public String getPath() {
-        return this.path;
+        return this.httpRequestLine.getPath();
     }
 
     public String getHeader(String key) {
@@ -46,39 +83,11 @@ public class HttpRequest {
     }
 
     public String getParameter(String key) {
-        return body.getValue(key);
+        return param.getValue(key);
     }
 
-    private void setFirstLine(String firstLine) throws IOException {
-        log.info(firstLine);
-        String[] tokens = firstLine.split(" ");
-
-        method = HttpMethod.valueOf(tokens[0]);
-        if (tokens[1].contains("?")) {
-            path = URLDecoder.decode(tokens[1].substring(0, tokens[1].indexOf("?")), "UTF-8");
-            body = new Body(URLDecoder.decode(tokens[1].substring(tokens[1].indexOf("?") + 1), "UTF-8"));
-        } else {
-            path = tokens[1];
-        }
-    }
-
-    private static String getHeaderLines(BufferedReader br) throws IOException {
-        String line = br.readLine();
-        String rawHeader = "";
-
-        while (!Strings.isNullOrEmpty(line)) {
-            log.info(line);
-            rawHeader += line + "\n";
-            line = br.readLine();
-        }
-
-        return rawHeader;
-    }
-
-    private void setBody(BufferedReader br) throws IOException {
-        if (header.exists("Content-Length")) {
-            String reqBody = readData(br, Integer.parseInt(header.getValue("Content-Length")));
-            body = new Body(URLDecoder.decode(reqBody, "UTF-8"));
-        }
+    public boolean isCookieExist(String key) {
+        if (this.header.exists(key)) return true;
+        return false;
     }
 }
