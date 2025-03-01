@@ -1,20 +1,14 @@
 package util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.URLDecoder;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import constants.HttpMethod;
-import http.request.Header;
-import http.request.RequestLine;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class HttpRequestUtils {
+public class HttpParserUtils {
     /**
      * @param
      * queryString은 URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
@@ -31,51 +25,6 @@ public class HttpRequestUtils {
      */
     public static Map<String, String> parseCookies(String cookies) {
         return parseValues(cookies, ";");
-    }
-
-    public static RequestLine getRequestLine(BufferedReader br) throws IOException {
-        String line = br.readLine();
-
-        // http method
-        HttpMethod httpMethod;
-        if ("POST".equals(line.split(" ")[0])) {
-            httpMethod = HttpMethod.POST;
-        } else {
-            httpMethod = HttpMethod.GET;
-        }
-
-        if (line.split(" ")[1].split("\\?").length == 2) {
-            return new RequestLine(httpMethod, line.split(" ")[1].split("\\?")[0], URLDecoder.decode(line.split(" ")[1].split("\\?")[1], "UTF-8"));
-        }
-
-        return new RequestLine(httpMethod, line.split(" ")[1].split("\\?")[0], "");
-    }
-
-    public static Header getHeader(BufferedReader br, HttpMethod httpMethod) throws IOException {
-
-        Map<String, String> header = new HashMap<>();
-
-        // 다음 줄 부터는 ': ' 형식이므로 while 문 돌리기
-        String line = br.readLine();
-        boolean isPost = httpMethod.equals(HttpMethod.POST);
-        while(!"".equals(line)) {
-            if (line == null) {
-                break;
-            }
-
-            String key = parseHeader(line).getKey();
-            String value = parseHeader(line).getValue();
-
-            header.put(key, value);
-            line = br.readLine();
-        }
-
-        if (isPost) {
-            String content = URLDecoder.decode(IOUtils.readData(br, Integer.parseInt(header.get("Content-Length"))), "UTF-8");
-            header.put("content", content);
-        }
-
-        return new Header(header);
     }
 
     private static Map<String, String> parseValues(String values, String separator) {
@@ -109,7 +58,7 @@ public class HttpRequestUtils {
         String key;
         String value;
 
-        Pair(String key, String value) {
+        public Pair(String key, String value) {
             this.key = key.trim();
             this.value = value.trim();
         }
