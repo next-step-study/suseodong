@@ -13,4 +13,8 @@ public class User {
     private String password;
     private String name;
     private String email;
+
+    public boolean login(String password) {
+        return this.password.equals(password);
+    }
 }
