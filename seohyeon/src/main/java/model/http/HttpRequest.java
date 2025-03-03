@@ -86,8 +86,8 @@ public class HttpRequest {
         return param.getValue(key);
     }
 
-    public boolean isCookieExist(String key) {
-        if (this.header.exists(key)) return true;
+    public boolean isCookieExist() {
+        if (this.header.exists("Cookie")) return true;
         return false;
     }
 }

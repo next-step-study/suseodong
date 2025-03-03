@@ -24,7 +24,7 @@ public class ListUserController extends AbstractController {
     }
 
     public boolean isLogin(HttpRequest request) {
-        if (request.isCookieExist("Cookie")) {
+        if (request.isCookieExist()) {
             Map<String, String> cookies = parseCookies(request.getHeader("Cookie"));
             if (Boolean.parseBoolean(cookies.get("logined"))) return true;
         }
