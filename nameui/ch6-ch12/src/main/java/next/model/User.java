@@ -1,6 +1,9 @@
 package next.model;
 
 public class User {
+    /**
+     * userId 라고 하면 뭔가, 데이터 베이스상의 아이디 같으니까... 네이밍을 다시 고쳐보기
+     */
     private String userId;
     private String password;
     private String name;
@@ -27,6 +30,14 @@ public class User {
 
     public String getEmail() {
         return email;
+    }
+
+    public User updateUser(String password, String name, String email) {
+        this.password = password;
+        this.name = name;
+        this.email = email;
+
+        return this;
     }
 
     @Override
