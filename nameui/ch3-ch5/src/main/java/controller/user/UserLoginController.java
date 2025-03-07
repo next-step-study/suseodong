@@ -6,6 +6,7 @@ import controller.Controller;
 import db.DataBase;
 import http.request.Request;
 import http.response.Response;
+import http.session.Session;
 import model.User;
 
 import java.io.File;
@@ -31,8 +32,10 @@ public class UserLoginController implements Controller {
             response.setStatus(HttpStatus.HTTP_STATUS_302);
             response.addHeader("Content-Type", "html");
             response.setBody(body);
-            response.addCookie("logined", "true");
             response.addHeader("Location", "/");
+            // 로그인 후 세션에 user 값 할당
+            Session session = request.getSession();
+            session.setAttribute("user", user);
 
             response.forward();
         }

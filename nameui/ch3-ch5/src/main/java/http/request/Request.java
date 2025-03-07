@@ -1,6 +1,7 @@
 package http.request;
 
 import constants.HttpMethod;
+import http.session.Session;
 
 import java.util.Map;
 
@@ -10,4 +11,5 @@ public interface Request {
     String getParameters(String key);
     String getRequestURI();
     HttpMethod getRequestMethod();
+    Session getSession();
 }

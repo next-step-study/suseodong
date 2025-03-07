@@ -5,7 +5,6 @@ import http.response.Response;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class HttpSession implements Session {
     String sessionId;

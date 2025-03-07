@@ -1,6 +1,8 @@
 package http.request;
 
 import constants.HttpMethod;
+import http.session.Session;
+import http.session.SessionManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import util.HttpParserUtils;
@@ -33,6 +35,10 @@ public class HttpRequest implements Request {
     public Map<String, String> getCookies() {
 
         return HttpParserUtils.parseCookies(header.getHeaderValue("Cookie"));
+    }
+
+    public Session getSession() {
+        return SessionManager.getSession(getCookies().get("JSESSIONID"));
     }
 
     public String getHeader(String key) {
@@ -89,6 +95,10 @@ public class HttpRequest implements Request {
 
             String key = parseHeader(line).getKey();
             String value = parseHeader(line).getValue();
+
+            if (key.equals("Cookie")) {
+                value = value.replaceFirst("JSESSIONID=[^;]+;\\s*", "");
+            }
 
             header.put(key, value);
             line = br.readLine();

@@ -6,6 +6,7 @@ import controller.Controller;
 import db.DataBase;
 import http.request.Request;
 import http.response.Response;
+import http.session.Session;
 import util.GenerateHtmlUtils;
 
 import java.io.File;
@@ -26,8 +27,7 @@ public class UserListController implements Controller {
     }
 
     private void doGet(Request request, Response response) throws IOException {
-        Map<String, String> cookies = request.getCookies();
-        boolean isLogined = Boolean.parseBoolean(cookies.get("logined"));
+        boolean isLogined = isLogined(request.getSession());
 
         if (isLogined) { // 로그인 상태
             String body = new String(Files.readAllBytes(new File(BASE_URL + "/user/list.html").toPath()));
@@ -52,5 +52,10 @@ public class UserListController implements Controller {
             response.setBody(body);
             response.forward();
         }
+    }
+
+    private boolean isLogined(Session session) {
+        Object user = session.getAttribute("user");
+        return user != null;
     }
 }
