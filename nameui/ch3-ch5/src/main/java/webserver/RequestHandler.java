@@ -7,6 +7,8 @@ import http.request.HttpRequest;
 import http.request.Request;
 import http.response.HttpResponse;
 import http.response.Response;
+import http.session.Session;
+import http.session.SessionManager;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -31,6 +33,12 @@ public class RequestHandler extends Thread {
             Response response = new HttpResponse(new DataOutputStream(out));
 
             log.debug("request : {}, {}", request.getRequestMethod().name(), request.getRequestURI());
+
+            // 세션 처리
+            String id = request.getCookies().get("JSESSIONID");
+            Session session = SessionManager.getSession(id);
+            response.addCookie("JSESSIONID", session.getId());
+            log.debug("session : {}", session.getId());
 
             // FrontController 에게 요청 전달
             FrontController frontController = new FrontController();
