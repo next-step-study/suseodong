@@ -1,3 +1,4 @@
+<%@ page import="next.model.User" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
@@ -80,11 +81,12 @@
       <div class="panel panel-default content-main">
           <form name="question" method="post" action="/user/update">
               <%
-                  String userId = request.getParameter("userId");
+                  // request에서 user 객체 가져오기
+                  User user = (User) request.getAttribute("user");
               %>
               <div class="form-group">
-                  <label for="userId">사용자 아이디</label>
-                  <input type="hidden" class="form-control" id="userId" name="userId" placeholder="User ID" value="<%= userId %>">
+<%--                  <label for="userId">사용자 아이디</label>--%>
+                  <input type="hidden" class="form-control" id="userId" name="userId" placeholder="User ID" value="<%= user.getUserId() %>">
               </div>
               <div class="form-group">
                   <label for="password">비밀번호</label>
