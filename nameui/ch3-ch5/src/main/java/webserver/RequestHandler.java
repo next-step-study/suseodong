@@ -3,12 +3,12 @@ package webserver;
 import java.io.*;
 import java.net.Socket;
 import controller.FrontController;
+import http.filter.FilterChain;
+import http.filter.SessionFilter;
 import http.request.HttpRequest;
 import http.request.Request;
 import http.response.HttpResponse;
 import http.response.Response;
-import http.session.Session;
-import http.session.SessionManager;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -34,11 +34,11 @@ public class RequestHandler extends Thread {
 
             log.debug("request : {}, {}", request.getRequestMethod().name(), request.getRequestURI());
 
-            // 세션 처리
-            String id = request.getCookies().get("JSESSIONID");
-            Session session = SessionManager.getSession(id);
-            response.addCookie("JSESSIONID", session.getId());
-            log.debug("session : {}", session.getId());
+            // Filter 처리(세션)
+            FilterChain filterChain = new FilterChain();
+            filterChain.addFilter(new SessionFilter());
+
+            filterChain.doFilter(request, response);
 
             // FrontController 에게 요청 전달
             FrontController frontController = new FrontController();
