@@ -3,7 +3,7 @@ package controller;
 import controller.adapter.ControllerHandlerAdapter;
 import controller.adapter.HandlerAdapter;
 import controller.etc.CssController;
-import controller.etc.HtmlController;
+import controller.etc.ForwardController;
 import controller.home.HomeController;
 import controller.user.UserListController;
 import controller.user.UserLoginController;
@@ -33,7 +33,7 @@ public class FrontController {
         handlerMappingMap.put("/user/list", new UserListController());
         handlerMappingMap.put("/", new HomeController());
         handlerMappingMap.put("/css", new CssController());
-        handlerMappingMap.put("/html", new HtmlController());
+        handlerMappingMap.put("/html", new ForwardController());
     }
 
     private void initHandlerAdapters() {

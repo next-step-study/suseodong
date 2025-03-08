@@ -12,13 +12,13 @@ import http.response.Response;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class RequestHandler extends Thread {
+public class DispatcherServlet extends Thread {
 //    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private Socket connection;
     public static final String BASE_URL = "webapp";
 
-    public RequestHandler(Socket connectionSocket) {
+    public DispatcherServlet(Socket connectionSocket) {
         this.connection = connectionSocket;
     }
 

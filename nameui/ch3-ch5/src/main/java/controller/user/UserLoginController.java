@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static webserver.RequestHandler.BASE_URL;
+import static webserver.DispatcherServlet.BASE_URL;
 
 public class UserLoginController implements Controller {
     @Override

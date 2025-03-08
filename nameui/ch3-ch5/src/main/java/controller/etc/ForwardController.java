@@ -10,9 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static webserver.RequestHandler.BASE_URL;
+import static webserver.DispatcherServlet.BASE_URL;
 
-public class HtmlController implements Controller {
+public class ForwardController implements Controller {
     @Override
     public void process(Request request, Response response) throws IOException {
         if (request.getRequestMethod().equals(HttpMethod.GET)) {

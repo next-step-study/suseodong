@@ -14,9 +14,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Map;
 
-import static webserver.RequestHandler.BASE_URL;
+import static webserver.DispatcherServlet.BASE_URL;
 
 public class UserListController implements Controller {
     @Override
