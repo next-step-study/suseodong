@@ -91,7 +91,12 @@
                         <td>${user.userId}</td>
                         <td>${user.name}</td>
                         <td>${user.email}</td>
-                        <td><a href="/user/update?userId=${user.userId}&password=${user.password}&name=${user.name}&email=${user.email}" class="btn btn-success" role="button">수정</a>
+                        <td>
+                            <c:choose>
+                                <c:when test="${sessionScope.user.userId == user.userId}">
+                                    <a href="/user/update?userId=${user.userId}&password=${user.password}&name=${user.name}&email=${user.email}" class="btn btn-success" role="button">수정</a>
+                                </c:when>
+                            </c:choose>
                         </td>
                     </tr>
                 </c:forEach>
