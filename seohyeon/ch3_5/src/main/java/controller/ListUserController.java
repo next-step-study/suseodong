@@ -9,12 +9,13 @@ import java.util.Map;
 import model.User;
 import model.http.HttpRequest;
 import model.http.HttpResponse;
+import model.http.HttpSession;
 
 public class ListUserController extends AbstractController {
 
     @Override
     void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        if (isLogin(request)) {
+        if (isLogin(request.getSession())) {
             String userListRes = createUserList();
             byte[] resBody = userListRes.getBytes();
             response.forwardBody(resBody);
@@ -23,12 +24,9 @@ public class ListUserController extends AbstractController {
         }
     }
 
-    public boolean isLogin(HttpRequest request) {
-        if (request.isCookieExist()) {
-            Map<String, String> cookies = parseCookies(request.getHeader("Cookie"));
-            if (Boolean.parseBoolean(cookies.get("logined"))) return true;
-        }
-        return false;
+    public boolean isLogin(HttpSession session) {
+        Object user = session.getAttribute("user");
+        return user != null;
     }
 
     private String createUserList() {

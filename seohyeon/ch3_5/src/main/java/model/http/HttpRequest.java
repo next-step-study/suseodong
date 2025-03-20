@@ -5,6 +5,7 @@ import static util.HttpRequestUtils.parseHeader;
 import static util.IOUtils.readData;
 
 import com.google.common.base.Strings;
+import db.HttpSessions;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,6 +84,8 @@ public class HttpRequest {
     }
 
     public HttpCookie getCookies() { return new HttpCookie(getHeader("Cookie")); }
+
+    public HttpSession getSession() { return HttpSessions.getSession(getCookies().getCookie("JSESSIONID")); }
 
     public String getParameter(String key) {
         return param.getValue(key);
