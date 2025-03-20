@@ -10,6 +10,8 @@ import java.net.Socket;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.UUID;
+import model.http.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import model.http.HttpRequest;
@@ -37,6 +39,10 @@ public class RequestHandler extends Thread {
             DataOutputStream dos = new DataOutputStream(out);
             HttpResponse response = new HttpResponse(dos);
 
+            if (isSessionEmpty(request.getCookies())) {
+                response.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+            }
+
             Controller controller = RequestMapping.getController(reqUrl);
             if (controller == null) {
                 moveToDefaultPage(reqUrl, response);
@@ -46,6 +52,10 @@ public class RequestHandler extends Thread {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private boolean isSessionEmpty(HttpCookie cookies) {
+        return cookies.getCookie("JSESSIONID") == null;
     }
 
     private static void moveToDefaultPage(String reqUrl, HttpResponse response) {

@@ -82,6 +82,8 @@ public class HttpRequest {
         return this.header.getValue(key);
     }
 
+    public HttpCookie getCookies() { return new HttpCookie(getHeader("Cookie")); }
+
     public String getParameter(String key) {
         return param.getValue(key);
     }
