@@ -67,7 +67,7 @@
                     </c:when>
                     <c:otherwise>
                         <li><a href="#" role="button">로그아웃</a></li>
-                        <li><a href="#" role="button">개인정보수정</a></li>
+                        <li><a href="../user/update.jsp" role="button">개인정보수정</a></li>
                     </c:otherwise>
                 </c:choose>
             </ul>
