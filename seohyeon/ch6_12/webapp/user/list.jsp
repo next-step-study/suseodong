@@ -4,10 +4,10 @@
 <!DOCTYPE html>
 <html lang="kr">
 <head>
-    <%@ include file="../include/header.jsp" %>
+    <%@ include file="/include/header.jspf" %>
 </head>
 <body>
-<%@ include file="../include/navigation.jsp" %>
+<%@ include file="/include/navigation.jspf" %>
 
 <div class="container" id="main">
     <div class="col-md-10 col-md-offset-1">
@@ -25,12 +25,7 @@
                         <td>${user.userId}</td>
                         <td>${user.name}</td>
                         <td>${user.email}</td>
-                        <td>
-                            <c:choose>
-                                <c:when test="${sessionScope.user.userId == user.userId}">
-                                    <a href="/user/update?userId=${user.userId}&password=${user.password}&name=${user.name}&email=${user.email}" class="btn btn-success" role="button">수정</a>
-                                </c:when>
-                            </c:choose>
+                        <td><a href="/users/updateForm?userId=${user.userId}" class="btn btn-success" role="button">수정</a>
                         </td>
                     </tr>
                 </c:forEach>
@@ -40,6 +35,6 @@
     </div>
 </div>
 
-<%@ include file="../include/footer.jsp" %>
+<%@ include file="/include/footer.jspf" %>
 </body>
 </html>
