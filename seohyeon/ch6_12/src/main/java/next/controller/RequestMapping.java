@@ -8,10 +8,10 @@ public class RequestMapping {
     private static Map<String, Controller> controllers = new HashMap<>();
     static {
         controllers.put("/", new HomeController());
+        controllers.put("/users/form", new ForwardController("/user/form.jsp"));
         controllers.put("/users/create", new CreateUserController());
-        controllers.put("/users/form", new CreateUserController());
         controllers.put("/users/login", new LoginController());
-        controllers.put("/users/loginForm", new LoginController());
+        controllers.put("/users/loginForm", new ForwardController("/user/login.jsp"));
         controllers.put("/users/logout", new LogoutController());
         controllers.put("/users/profile", new ProfileController());
         controllers.put("/users/update", new UpdateUserController());

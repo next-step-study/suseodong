@@ -8,14 +8,12 @@ import javax.servlet.http.HttpSession;
 import core.db.DataBase;
 import next.model.User;
 
-@WebServlet(value = { "/users/login", "/users/loginForm" })
+@WebServlet("/users/login")
 public class LoginController implements Controller {
     private static final long serialVersionUID = 1L;
 
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if (request.getMethod().equals("GET")) return "/user/login.jsp";
-
         String userId = request.getParameter("userId");
         String password = request.getParameter("password");
         User user = DataBase.findUserById(userId);
