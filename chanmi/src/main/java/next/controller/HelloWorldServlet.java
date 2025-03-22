@@ -1,4 +1,4 @@
-package controller;
+package next.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
