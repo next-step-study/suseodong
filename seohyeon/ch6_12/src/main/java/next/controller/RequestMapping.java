@@ -6,7 +6,8 @@ import java.util.Map;
 public class RequestMapping {
 
     private static Map<String, Controller> controllers = new HashMap<>();
-    static {
+
+    void init() {
         controllers.put("/", new HomeController());
         controllers.put("/users/form", new ForwardController("/user/form.jsp"));
         controllers.put("/users/create", new CreateUserController());
@@ -19,5 +20,5 @@ public class RequestMapping {
         controllers.put("/users", new ListUserController());
     }
 
-    public static Controller getController(String url) { return controllers.get(url); }
+    public Controller getController(String url) { return controllers.get(url); }
 }
