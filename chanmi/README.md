@@ -76,3 +76,38 @@ http://localhost:8080/user/list
 * java 클래스들은 `webapp` - `WEB-INF` - `classes` - `MyPackages` 내부에 존재
 * build output directory를 해당 패키지로 변경하면 `Servlet` 구현 클래스 자동 인식 가능
 </details>
+
+<details>
+  <summary>6️⃣ 서블릿/JSP를 활용해 동적인 웹 애플리케이션 개발하기</summary>
+
+## Servlet
+### `RequestDispatcher`
+* 서버 내부에서 요청(request)을 다른 리소스(JSP, 서블릿 등)로 넘겨주는 클래스
+* MVC 패턴에서 컨트롤러 → JSP로 화면 포워딩할 때 사용
+```java
+RequestDispatcher dispatcher = req.getRequestDispatcher("/result.jsp");
+dispatcher.forward(req, resp);
+```
+
+### 다른 데이터를 반환하려면?
+* JSP 포워딩이 아니라 `PrintWriter`에 직접 작성
+```java
+resp.setContentType("application/json");
+resp.setCharacterEncoding("UTF-8");
+
+String json = "{\"message\": \"Hello, World!\"}";
+PrintWriter out = resp.getWriter();
+out.print(json);
+out.flush();
+```
+
+### `HttpServletRequest`
+- JSP에 넘길 속성 값 설정
+```java
+httpServletResquest.setAttribute()
+```
+
+### `HttpSession`
+* 세션을 `session.setAttribute` 메서드로 저장하면, `Set-Cookie: JSESSIONID:값`이 자동으로 response header에 추가됨
+
+</details>
