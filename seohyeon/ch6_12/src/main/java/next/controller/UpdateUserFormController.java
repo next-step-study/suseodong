@@ -1,13 +1,15 @@
 package next.controller;
 
 import core.db.DataBase;
+import core.mvc.Controller;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import next.model.User;
+import next.util.UserSessionUtils;
 
 @WebServlet("/users/updateForm")
-public class UpdateUserFormController implements Controller{
+public class UpdateUserFormController implements Controller {
 
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {

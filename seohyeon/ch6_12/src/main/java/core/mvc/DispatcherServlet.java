@@ -1,4 +1,4 @@
-package next.controller;
+package core.mvc;
 
 import java.io.IOException;
 import javax.servlet.RequestDispatcher;

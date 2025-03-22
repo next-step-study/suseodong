@@ -1,9 +1,9 @@
-package next.controller;
+package core.mvc;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class ForwardController implements Controller{
+public class ForwardController implements Controller {
 
     private String forwardUrl;
 

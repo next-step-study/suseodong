@@ -1,7 +1,15 @@
-package next.controller;
+package core.mvc;
 
 import java.util.HashMap;
 import java.util.Map;
+import next.controller.CreateUserController;
+import next.controller.HomeController;
+import next.controller.ListUserController;
+import next.controller.LoginController;
+import next.controller.LogoutController;
+import next.controller.ProfileController;
+import next.controller.UpdateUserController;
+import next.controller.UpdateUserFormController;
 
 public class RequestMapping {
 

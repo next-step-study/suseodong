@@ -2,9 +2,11 @@ package next.controller;
 
 import core.db.DataBase;
 
+import core.mvc.Controller;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import next.util.UserSessionUtils;
 
 @WebServlet("/users")
 public class ListUserController implements Controller {

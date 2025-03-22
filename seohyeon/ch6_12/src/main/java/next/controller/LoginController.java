@@ -1,5 +1,6 @@
 package next.controller;
 
+import core.mvc.Controller;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -7,6 +8,7 @@ import javax.servlet.http.HttpSession;
 
 import core.db.DataBase;
 import next.model.User;
+import next.util.UserSessionUtils;
 
 @WebServlet("/users/login")
 public class LoginController implements Controller {

@@ -1,4 +1,4 @@
-package next.controller;
+package next.util;
 
 import javax.servlet.http.HttpSession;
 
