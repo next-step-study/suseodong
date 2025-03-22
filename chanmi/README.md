@@ -110,4 +110,11 @@ httpServletResquest.setAttribute()
 ### `HttpSession`
 * 세션을 `session.setAttribute` 메서드로 저장하면, `Set-Cookie: JSESSIONID:값`이 자동으로 response header에 추가됨
 
+## Tomcat 실행
+* 실행 중 임시 작업 디렉터리에 `jsp`를 서블릿 자바 코드로 변환된 .java 파일과 .class 파일이 생성됨
+* 실행 중에는 해당 파일들을 사용 중이므로 삭제하면 안된다.
+* `ROOT` 디렉터리
+    * 웹 애플리케이션의 기본 컨텍스트(context path /)를 의미
+    * 루트 경로(/)에 배포된 웹앱의 정리된 내부 구조
+
 </details>
