@@ -14,10 +14,13 @@ public class WebServerLauncher {
 
     public static void main(String args[]) throws Exception {
         Tomcat tomcat = new Tomcat();
+        tomcat.setBaseDir("build/tomcat");
         tomcat.setPort(DEFAULT_PORT);
+        tomcat.addWebapp("/", new File(WEBAPP_DIR_LOCATION).getAbsolutePath());
+
         Connector connector = tomcat.getConnector();
         connector.setURIEncoding("UTF-8");
-        tomcat.addWebapp("/", new File(WEBAPP_DIR_LOCATION).getAbsolutePath());
+
         log.info("Starting webapp from {}", new File(WEBAPP_DIR_LOCATION).getAbsolutePath());
 
         tomcat.start();
