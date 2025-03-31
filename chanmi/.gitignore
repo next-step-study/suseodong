@@ -1,0 +1,10 @@
+/bin/
+/.settings/
+/target/
+/.classpath
+/.project
+/.idea
+web-application-server.iml
+webapp/WEB-INF/classes/**
+out/**
+build/**
